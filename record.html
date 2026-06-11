@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Studio 🎙️ — Letter Castle</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body{
+  font-family: ui-rounded, "Comic Sans MS", "Segoe UI", system-ui, sans-serif;
+  background:#eef3fb; color:#27355c; padding-bottom:60px;
+}
+button{ font-family:inherit; color:inherit; border:none; background:none; cursor:pointer; }
+header{
+  position:sticky; top:0; z-index:5;
+  background:#fffdf6; border-bottom:3px solid #e3d3ae;
+  padding:14px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+header h1{ font-size:22px; flex:1; min-width:200px; }
+#progress{
+  font-size:15px; font-weight:800; color:#a07d12; background:#fff4cc;
+  border:2px solid #f4dd92; border-radius:999px; padding:6px 14px;
+}
+.back{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#fff; border:2px solid #e8d9b8; border-radius:999px;
+  padding:8px 16px; font-size:14px; font-weight:700; color:#6b5c39;
+  text-decoration:none; box-shadow:0 3px 0 #e3d3ae;
+}
+main{ max-width:760px; margin:0 auto; padding:14px; }
+.banner{
+  background:#fdeeee; border:2.5px solid #f3c7c3; color:#b04438;
+  border-radius:16px; padding:12px 16px; font-size:15px; font-weight:700;
+  margin-bottom:12px; line-height:1.45;
+}
+.banner.hidden{ display:none; }
+.tip{
+  background:#fff; border-radius:18px; padding:14px 16px; margin-bottom:16px;
+  font-size:15px; line-height:1.5; box-shadow:0 3px 12px rgba(39,53,92,.07);
+}
+.tip b{ color:#e06a3e; }
+h3{ font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#8d97b5; margin:18px 4px 10px; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
+.scard{
+  background:#fff; border-radius:16px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow:0 3px 10px rgba(39,53,92,.07);
+  border:2.5px solid transparent;
+}
+.scard.saved{ border-color:#bfe8cf; }
+.scard.rec{ border-color:#e2574c; animation:recPulse 1s ease-in-out infinite; }
+@keyframes recPulse{ 0%,100%{ box-shadow:0 3px 10px rgba(39,53,92,.07);} 50%{ box-shadow:0 0 0 5px rgba(226,87,76,.22);} }
+.sym{ font-size:26px; font-weight:800; width:46px; text-align:center; flex:0 0 auto; }
+.scard .meta{ flex:1; min-width:0; }
+.scard .state{ font-size:11.5px; font-weight:700; color:#9aa3bd; }
+.scard.saved .state{ color:#2f9e5f; }
+.btns{ display:flex; gap:6px; flex:0 0 auto; }
+.btns button{
+  width:38px; height:38px; border-radius:50%; font-size:16px;
+  background:#f1f4fa; border:2px solid #e6eaf4;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .1s;
+}
+.btns button:active{ transform:scale(.92); }
+.btns button:disabled{ opacity:.35; cursor:default; }
+.btn-rec{ background:#fdeeee !important; border-color:#f3c7c3 !important; }
+.scard.rec .btn-rec{ background:#e2574c !important; border-color:#b13d34 !important; }
+#toast{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(80px);
+  background:#27355c; color:#fff; font-size:15px; font-weight:700;
+  padding:10px 22px; border-radius:999px; transition:transform .25s; z-index:9;
+  max-width:90vw; text-align:center;
+}
+#toast.show{ transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙️ Sound Studio</h1>
+  <div id="progress">0 / 34 recorded</div>
+  <a class="back" href="index.html">🏰 Back to the game</a>
+</header>
+
+<main>
+  <div class="banner hidden" id="bannerServer">
+    ⚠️ This page can't save recordings right now. Start the game with <b>serve.bat</b>
+    (it runs the recording server), then open <b>http://localhost:8000/record.html</b>.
+  </div>
+  <div class="banner hidden" id="bannerSecure">
+    ⚠️ The microphone only works on the computer running the server. Please open
+    <b>http://localhost:8000/record.html</b> on that computer (not a phone or tablet —
+    they will still <i>play</i> your recordings in the game).
+  </div>
+  <div class="banner hidden" id="bannerMic">
+    ⚠️ Microphone access was blocked. Click the 🔒/🎙️ icon in the address bar and allow
+    the microphone, then try again.
+  </div>
+
+  <div class="tip">
+    Tap <b>●</b>, say the letter's <b>sound</b> — like <b>“buh”</b> for B, <b>“sss”</b> for S,
+    <b>“mmm”</b> for M — and it stops by itself after 3 seconds (or tap ■ to stop sooner).
+    Short, clear and cheerful works best! Your child hears these in the game before the
+    robot voice — or instead of it, if you turn the voice off in settings.
+    Recordings are saved as files in the <b>sounds</b> folder next to the game.
+  </div>
+
+  <h3>Letters</h3>
+  <div class="grid" id="gridLetters"></div>
+
+  <h3>Letter Teams (for Letter Teams mode)</h3>
+  <div class="grid" id="gridTeams"></div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const TEAMS = ['sh','ch','th','wh','ph','qu','ck','ng'];
+const ALL = LETTERS.concat(TEAMS);
+const $ = s => document.querySelector(s);
+
+let manifest = {};
+let serverOK = false;
+let stream = null, mediaRec = null, activeKey = null, chunks = [], stopTimer = 0;
+const cards = {};
+
+function toast(msg, ms){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), ms || 2200);
+}
+
+function pickMime(){
+  if(!window.MediaRecorder) return null;
+  const tries = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+  for(const m of tries){ if(MediaRecorder.isTypeSupported(m)) return m; }
+  return ''; // let the browser choose
+}
+
+function updateProgress(){
+  const n = ALL.filter(k => manifest[k]).length;
+  $('#progress').textContent = `${n} / ${ALL.length} recorded`;
+}
+
+function refreshCard(key){
+  const c = cards[key];
+  const saved = !!manifest[key];
+  c.root.classList.toggle('saved', saved);
+  c.root.classList.toggle('rec', activeKey === key);
+  c.state.textContent = activeKey === key ? '● recording…' : (saved ? '✓ saved' : 'not recorded');
+  c.play.disabled = !saved || !!activeKey;
+  c.del.disabled = !saved || !!activeKey;
+  c.rec.textContent = activeKey === key ? '■' : '●';
+  c.rec.disabled = !!activeKey && activeKey !== key;
+}
+function refreshAll(){ ALL.forEach(refreshCard); updateProgress(); }
+
+function makeCard(key, parent){
+  const root = document.createElement('div');
+  root.className = 'scard';
+  const label = key.length === 1 ? key.toUpperCase() + key : key;
+  root.innerHTML = `<div class="sym">${label}</div><div class="meta"><div class="state"></div></div>`;
+  const btns = document.createElement('div');
+  btns.className = 'btns';
+  const rec = document.createElement('button'); rec.className = 'btn-rec'; rec.textContent = '●'; rec.title = 'Record';
+  const play = document.createElement('button'); play.textContent = '▶'; play.title = 'Play';
+  const del = document.createElement('button'); del.textContent = '🗑'; del.title = 'Delete';
+  btns.append(rec, play, del);
+  root.appendChild(btns);
+  parent.appendChild(root);
+  rec.addEventListener('click', () => activeKey === key ? stopRec() : startRec(key));
+  play.addEventListener('click', () => playKey(key));
+  del.addEventListener('click', () => delKey(key));
+  cards[key] = { root, rec, play, del, state: root.querySelector('.state') };
+}
+
+async function startRec(key){
+  if(activeKey) return;
+  if(!window.isSecureContext || !navigator.mediaDevices || !window.MediaRecorder){
+    $('#bannerSecure').classList.remove('hidden');
+    return;
+  }
+  if(!serverOK){ $('#bannerServer').classList.remove('hidden'); toast('Start serve.bat first!'); return; }
+  try{
+    if(!stream) stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+  }catch(e){
+    $('#bannerMic').classList.remove('hidden');
+    return;
+  }
+  $('#bannerMic').classList.add('hidden');
+  const mime = pickMime();
+  try{
+    mediaRec = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+  }catch(e){
+    mediaRec = new MediaRecorder(stream);
+  }
+  chunks = [];
+  activeKey = key;
+  mediaRec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  mediaRec.onstop = onRecStop;
+  mediaRec.start();
+  stopTimer = setTimeout(stopRec, 3000);
+  refreshAll();
+}
+
+function stopRec(){
+  clearTimeout(stopTimer);
+  if(mediaRec && mediaRec.state !== 'inactive') mediaRec.stop();
+}
+
+async function onRecStop(){
+  const key = activeKey;
+  activeKey = null;
+  const type = (mediaRec.mimeType || 'audio/webm').split(';')[0];
+  const blob = new Blob(chunks, { type });
+  if(!key || blob.size < 200){ refreshAll(); toast('Too short — try again!'); return; }
+  try{
+    const res = await fetch(`/save-sound?name=${encodeURIComponent(key)}`, {
+      method:'POST', headers:{ 'Content-Type':type }, body:blob
+    });
+    const j = await res.json();
+    if(j.ok){
+      manifest[key] = j.file;
+      await saveManifest();
+      refreshAll();
+      toast(`✓ Saved ${key.length === 1 ? key.toUpperCase() : key} to the sounds folder`);
+      playKey(key); // instant preview
+    } else {
+      toast('Could not save: ' + (j.error || 'unknown error'), 3500);
+    }
+  }catch(e){
+    $('#bannerServer').classList.remove('hidden');
+    toast('Saving failed — is serve.bat running?', 3500);
+    refreshAll();
+  }
+}
+
+function saveManifest(){
+  return fetch('/save-manifest', {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify(manifest)
+  }).catch(() => {});
+}
+
+function playKey(key){
+  if(!manifest[key]) return;
+  new Audio('sounds/' + manifest[key] + '?p=' + Date.now()).play().catch(() => {});
+}
+
+async function delKey(key){
+  try{ await fetch('/delete-sound?name=' + encodeURIComponent(key), { method:'DELETE' }); }catch(e){}
+  delete manifest[key];
+  await saveManifest();
+  refreshAll();
+  toast('Deleted');
+}
+
+async function init(){
+  LETTERS.forEach(k => makeCard(k, $('#gridLetters')));
+  TEAMS.forEach(k => makeCard(k, $('#gridTeams')));
+  try{
+    const p = await fetch('/ping');
+    const j = await p.json();
+    serverOK = !!(j.ok && j.studio);
+  }catch(e){ serverOK = false; }
+  if(!serverOK) $('#bannerServer').classList.remove('hidden');
+  if(!window.isSecureContext || !navigator.mediaDevices || !window.MediaRecorder) $('#bannerSecure').classList.remove('hidden');
+  try{
+    const r = await fetch('sounds/manifest.json?studio=' + Date.now());
+    if(r.ok) manifest = await r.json() || {};
+  }catch(e){ manifest = {}; }
+  refreshAll();
+}
+init();
+</script>
+</body>
+</html>

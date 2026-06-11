@@ -37,6 +37,7 @@ body{
   touch-action:manipulation;
 }
 button{ font-family:inherit; color:inherit; border:none; background:none; cursor:pointer; touch-action:manipulation; }
+.hidden{ display:none !important; }
 
 /* ============================= LAYOUT ============================= */
 #app{ display:flex; flex-direction:column; height:100vh; height:100dvh; }
@@ -210,6 +211,16 @@ button.hud-pill:active{ transform:scale(.94); }
   display:flex; justify-content:center;
 }
 #settingsFoot .big-btn{ width:100%; max-width:528px; font-size:22px; padding:14px; }
+.stage-row{ display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.stage-row .stage-num{ width:20px; font-weight:800; color:#8d97b5; text-align:center; flex:0 0 auto; font-size:14px; }
+.stage-row select{
+  font-family:inherit; font-size:13px; font-weight:700; color:var(--ink);
+  background:#fafbfe; border:2px solid #e6eaf4; border-radius:10px; padding:8px 4px; min-width:0;
+}
+.stage-row .sel-mode{ flex:1.25 1 0; }
+.stage-row .sel-style{ flex:1.15 1 0; }
+.stage-row .sel-n{ flex:0 0 52px; }
+.stage-row .x{ flex:0 0 30px; height:30px; border-radius:50%; background:#fdeeee; color:#b04438; font-weight:800; font-size:14px; }
 .tricky-list{ display:flex; gap:8px; flex-wrap:wrap; }
 .tricky-list .t-chip{ background:#fdeeee; border:2px solid #f3c7c3; color:#b04438; border-radius:12px; padding:6px 12px; font-weight:800; font-size:15px; }
 .tricky-list .none{ color:#9aa3bd; font-weight:600; font-size:14px; }
@@ -278,6 +289,37 @@ button.hud-pill:active{ transform:scale(.94); }
 .bfly-wl{ animation:flut .16s ease-in-out infinite; }
 .bfly-wr{ animation:flut .16s ease-in-out infinite reverse; }
 @keyframes flut{ 0%,100%{ transform:scaleX(1);} 50%{ transform:scaleX(.25);} }
+
+/* ============================= STAR SHOP ============================= */
+#shopInner{ width:100%; max-width:470px; max-height:100%; display:flex; flex-direction:column; background:#eef3fb; border-radius:28px; padding:14px; box-shadow:var(--shadow); }
+#shopHead{ display:flex; justify-content:space-between; align-items:center; padding:4px 8px 10px; flex:0 0 auto; }
+#shopHead h2{ font-size:24px; }
+#shopWallet{ font-size:18px; font-weight:800; color:#a07d12; background:#fff4cc; border:2px solid #f4dd92; border-radius:999px; padding:6px 14px; }
+#shopScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px; }
+.shop-card{ display:flex; align-items:center; gap:12px; background:#fff; border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 3px 10px rgba(39,53,92,.07); }
+.shop-card.shake{ animation:shakeBtn .4s; }
+.shop-icon{ font-size:38px; width:52px; text-align:center; flex:0 0 auto; }
+.shop-info{ flex:1; min-width:0; }
+.shop-name{ font-size:17px; font-weight:800; }
+.shop-desc{ font-size:12.5px; color:#9aa3bd; font-weight:600; line-height:1.3; }
+.shop-buy{ flex:0 0 auto; background:var(--gold); color:#7a5a00; font-size:16px; font-weight:800; border-radius:999px; padding:10px 14px; box-shadow:0 4px 0 #d9a91f; white-space:nowrap; }
+.shop-buy:active{ transform:translateY(3px); box-shadow:0 1px 0 #d9a91f; }
+.shop-buy.cant{ filter:grayscale(.75); opacity:.6; }
+.shop-toggle{ flex:0 0 auto; border:2.5px solid #e6eaf4; color:#b6bdd1; font-size:14px; font-weight:800; border-radius:999px; padding:9px 14px; white-space:nowrap; }
+.shop-toggle.on{ border-color:var(--good); background:#e9f9f0; color:var(--good-dark); }
+#shopFoot{ padding-top:10px; display:flex; justify-content:center; flex:0 0 auto; }
+#shopFoot .big-btn{ width:100%; font-size:20px; padding:12px; }
+
+/* dragon + banner decorations */
+#dragonG .dwing{ transform-box:fill-box; transform-origin:left bottom; animation:wingIdle 3.2s ease-in-out infinite; }
+#dragonG.flying .dwing{ animation:wingFlap .18s ease-in-out infinite; }
+@keyframes wingIdle{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(-9deg);} }
+@keyframes wingFlap{ 0%,100%{ transform:rotate(16deg);} 50%{ transform:rotate(-28deg);} }
+#dragonG .dtail{ transform-box:fill-box; transform-origin:left center; animation:tailSway 4s ease-in-out infinite; }
+@keyframes tailSway{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(9deg);} }
+#dragonG .deye{ transition:transform .08s; transform-box:fill-box; transform-origin:center; }
+.bannerSway{ transform-box:fill-box; transform-origin:center top; animation:bannerSwing 3.5s ease-in-out infinite; }
+@keyframes bannerSwing{ 0%,100%{ transform:rotate(-1.5deg);} 50%{ transform:rotate(1.5deg);} }
 
 /* fx particles (driven by CSS vars set inline) */
 .part{ animation:partFly .6s ease-out forwards; }
@@ -360,7 +402,7 @@ button.hud-pill:active{ transform:scale(.94); }
         <g id="keepCren"></g>
         <polygon points="1380,372 1456,295 1532,372" fill="#d2625b" stroke="#b14e48" stroke-width="3"/>
         <line x1="1456" y1="296" x2="1456" y2="248" stroke="#7b8494" stroke-width="4"/>
-        <path class="flag" d="M 1456 250 L 1502 261 L 1456 272 Z" fill="#ff8a5c"/>
+        <path class="flag" id="flag1" d="M 1456 250 L 1502 261 L 1456 272 Z" fill="#ff8a5c"/>
         <rect x="1444" y="420" width="24" height="38" rx="11" fill="#5d6884"/>
         <rect x="1444" y="500" width="24" height="38" rx="11" fill="#5d6884"/>
         <!-- corner tower (right) -->
@@ -375,7 +417,7 @@ button.hud-pill:active{ transform:scale(.94); }
         <rect x="1248" y="462" width="108" height="258" fill="#d8dde7" stroke="#9aa3b8" stroke-width="3"/>
         <g id="gateCren"></g>
         <line x1="1302" y1="462" x2="1302" y2="414" stroke="#7b8494" stroke-width="4"/>
-        <path class="flag" style="animation-delay:-.8s" d="M 1302 416 L 1346 426 L 1302 436 Z" fill="#4f9dde"/>
+        <path class="flag" id="flag2" style="animation-delay:-.8s" d="M 1302 416 L 1346 426 L 1302 436 Z" fill="#4f9dde"/>
         <rect x="1290" y="492" width="24" height="34" rx="11" fill="#5d6884"/>
         <!-- gate arch -->
         <path id="gateHole" d="M 1272 718 L 1272 678 Q 1302 642 1332 678 L 1332 718 Z" fill="#352e44"/>
@@ -388,6 +430,9 @@ button.hud-pill:active{ transform:scale(.94); }
         </g>
         <path d="M 1272 678 Q 1302 642 1332 678" fill="none" stroke="#9aa3b8" stroke-width="4"/>
       </g>
+
+      <!-- bought decorations (bunting, flags, banners, garden) -->
+      <g id="castleDecoG"></g>
 
       <!-- bastion + catapult -->
       <g id="bastionG">
@@ -450,7 +495,11 @@ button.hud-pill:active{ transform:scale(.94); }
       <!-- bridge parapet lip (in front of troops) -->
       <path d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
       <g id="fx"></g>
+      <!-- pet dragon (above troops so he can swoop over them) -->
+      <g id="dragonG" style="display:none"></g>
       <g id="decorFront"></g>
+      <!-- word-builder sign (above foreground decor so it's never hidden) -->
+      <g id="wordSignG"></g>
       <g id="bflyLayer"></g>
 
       <!-- invisible walking guide -->
@@ -463,6 +512,7 @@ button.hud-pill:active{ transform:scale(.94); }
         <div class="hud-pill">⭐ <span id="hudStars">0</span></div>
       </div>
       <div class="hud-group">
+        <div class="hud-pill" id="hudStage" style="display:none">🗺️ <span>1/6</span></div>
         <div class="hud-pill">🛡️ <span id="hudWave">1/8</span></div>
       </div>
     </div>
@@ -471,7 +521,7 @@ button.hud-pill:active{ transform:scale(.94); }
   <div id="bar" class="hidden">
     <button id="chip" aria-label="Hear it again"><span id="chipSym">b</span><span class="speaker">🔊</span></button>
     <div id="barMid">
-      <div id="prompt">Find the capital letter!</div>
+      <div id="prompt">Find the uppercase letter!</div>
       <div id="choices"></div>
     </div>
   </div>
@@ -485,8 +535,9 @@ button.hud-pill:active{ transform:scale(.94); }
       <h1>Letter Castle</h1>
       <div class="sub">Defend the snacks — match the letters!</div>
       <div id="titleStars">⭐ 0 stars collected</div><br>
-      <button class="big-btn" id="btnPlay">▶ &nbsp;Play</button>
-      <div id="modePill">Letter Match • 3 choices • Relaxed</div>
+      <button class="big-btn" id="btnPlay">▶ &nbsp;Play</button><br>
+      <button class="soft-btn" id="btnShop">⭐ Star Shop</button>
+      <div id="modePill">Letter Match • 3 choices • Steady</div>
     </div>
   </div>
   <button class="soft-btn" id="grownups">🔒 Grown-Ups</button>
@@ -514,21 +565,56 @@ button.hud-pill:active{ transform:scale(.94); }
       <div class="set-card">
         <h3>Game Mode</h3>
         <div class="opt-row" id="modeRow">
-          <button class="opt" data-key="mode" data-val="letters"><span class="icon">🅰️</span><span>Letter Match<span class="opt-sub">Match big and small letters</span></span></button>
+          <button class="opt" data-key="mode" data-val="campaign"><span class="icon">🗺️</span><span>Campaign<span class="opt-sub">A journey through the modes, stage by stage</span></span></button>
+          <button class="opt" data-key="mode" data-val="letters"><span class="icon">🅰️</span><span>Letter Match<span class="opt-sub">Match uppercase and lowercase letters</span></span></button>
           <button class="opt" data-key="mode" data-val="teams"><span class="icon">🔠</span><span>Letter Teams<span class="opt-sub">Two-letter pairs like sh, ch, th</span></span></button>
           <button class="opt" data-key="mode" data-val="sounds"><span class="icon">🐶</span><span>First Sounds<span class="opt-sub">Which letter starts the picture?</span></span></button>
+          <button class="opt" data-key="mode" data-val="words"><span class="icon">✏️</span><span>Word Builder<span class="opt-sub">Drop letters into slots to spell words</span></span></button>
+          <button class="opt" data-key="mode" data-val="numbers"><span class="icon">🔢</span><span>Numbers<span class="opt-sub">Count the pictures, pick the number</span></span></button>
         </div>
+      </div>
+
+      <div class="set-card hidden" id="cardCampaign">
+        <h3>Campaign Plan</h3>
+        <div id="campProgress" style="font-size:14px; font-weight:700; color:#5d6884; margin-bottom:10px;"></div>
+        <div id="campList"></div>
+        <div class="quick-row" style="margin-top:10px;">
+          <button id="btnAddStage">＋ Add stage</button>
+          <button id="btnResetPlan">Reset plan</button>
+          <button id="btnRestartCamp">⟲ Back to stage 1</button>
+        </div>
+        <div class="hint">Each stage is one full round; finishing it unlocks the next, and progress is remembered. The letters used come from the “Letters in the Game” list below.</div>
       </div>
 
       <div class="set-card" id="cardStyle">
         <h3>Matching Style</h3>
         <div class="opt-row">
-          <button class="opt" data-key="matchStyle" data-val="lu"><span>Find the capital</span><span class="ex">b → B</span></button>
+          <button class="opt" data-key="matchStyle" data-val="lu"><span>Find the uppercase</span><span class="ex">b → B</span></button>
           <button class="opt" data-key="matchStyle" data-val="ul"><span>Find the lowercase</span><span class="ex">B → b</span></button>
-          <button class="opt" data-key="matchStyle" data-val="uu"><span>Match capitals</span><span class="ex">B → B</span></button>
+          <button class="opt" data-key="matchStyle" data-val="uu"><span>Match uppercase</span><span class="ex">B → B</span></button>
           <button class="opt" data-key="matchStyle" data-val="ll"><span>Match lowercase</span><span class="ex">b → b</span></button>
           <button class="opt" data-key="matchStyle" data-val="mixed"><span>Mix it up!</span><span class="ex">🎲</span></button>
         </div>
+      </div>
+
+      <div class="set-card hidden" id="cardSounds">
+        <h3>Answer Buttons Show</h3>
+        <div class="seg" id="segSoundsCase">
+          <button data-key="soundsCase" data-val="lower">a</button>
+          <button data-key="soundsCase" data-val="upper">A</button>
+          <button data-key="soundsCase" data-val="both">Aa</button>
+        </div>
+        <div class="hint">Which letter style the child picks from in First Sounds: lowercase, uppercase, or both together.</div>
+      </div>
+
+      <div class="set-card hidden" id="cardNumbers">
+        <h3>Counting Range</h3>
+        <div class="seg" id="segNumMax">
+          <button data-key="numMax" data-val="3">1–3</button>
+          <button data-key="numMax" data-val="5">1–5</button>
+          <button data-key="numMax" data-val="10">1–10</button>
+        </div>
+        <div class="hint">How high the counting goes. The troop carries the pictures; the buttons show numerals.</div>
       </div>
 
       <div class="set-card" id="cardLetters">
@@ -554,6 +640,16 @@ button.hud-pill:active{ transform:scale(.94); }
         </div>
         <div class="chip-grid" id="teamGrid"></div>
         <div class="hint">Digraphs make one sound (sh, ch). Blends mix two (st, br). Pick at least 2.</div>
+      </div>
+
+      <div class="set-card hidden" id="cardWords">
+        <h3>Words to Build</h3>
+        <div class="seg" id="segWordLen">
+          <button data-key="wordLen" data-val="3">Short (3)</button>
+          <button data-key="wordLen" data-val="4">Longer (4)</button>
+          <button data-key="wordLen" data-val="both">Both</button>
+        </div>
+        <div class="hint">Each defeated troop drops its letter into the word sign — c‑a‑t spells cat! A round builds a few words, following the Round Length setting.</div>
       </div>
 
       <div class="set-card">
@@ -598,7 +694,10 @@ button.hud-pill:active{ transform:scale(.94); }
         <h3>Sound</h3>
         <div class="switch-row"><span>Sound effects</span><button class="switch" id="swSfx" aria-label="Sound effects"></button></div>
         <div class="switch-row"><span>Voice (speaks the letters)</span><button class="switch" id="swVoice" aria-label="Voice"></button></div>
+        <div class="switch-row"><span>Parent letter sounds <span id="phonicsCount" style="font-size:13px; color:#9aa3bd;"></span></span><button class="switch" id="swPhonics" aria-label="Parent letter sounds"></button></div>
         <button class="soft-btn" id="btnVoiceTest">🔊 Test the voice</button>
+        <button class="soft-btn" id="btnStudio">🎙️ Open the Sound Studio</button>
+        <div class="hint">Record your own voice saying each letter's sound (“buh” for B) in the Sound Studio — open the game with serve.bat on the computer, then come back here. Recordings are saved as files in the <b>sounds</b> folder and play on every device, before (or instead of) the robot voice.</div>
       </div>
 
       <div class="set-card">
@@ -606,6 +705,7 @@ button.hud-pill:active{ transform:scale(.94); }
         <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Tricky letters so far:</div>
         <div class="tricky-list" id="trickyList"><span class="none">Play a round to see which letters need practice.</span></div>
         <div id="statTotals"></div>
+        <div class="hint">Tricky letters quietly march in a little more often, so they get extra practice without anyone noticing.</div>
         <br>
         <button class="soft-btn" id="btnResetStats">🧹 Reset progress &amp; stars</button>
       </div>
@@ -620,12 +720,14 @@ button.hud-pill:active{ transform:scale(.94); }
 <!-- ============ WAVE END ============ -->
 <div id="scrWave" class="overlay dimmed hidden">
   <div class="card">
-    <h2>Castle Defended! 🎉</h2>
+    <h2 id="waveTitle">Castle Defended! 🎉</h2>
     <div class="rate-stars" id="rateStars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
     <div class="stat-line" id="waveStat1">You earned 8 ⭐</div>
     <div class="stat-line" id="waveStat2" style="color:#7c87a6; font-size:15px;">6 of 8 on the first try!</div>
+    <div class="stat-line" id="waveNext" style="color:#7c87a6; font-size:14px;"></div>
     <br>
     <button class="big-btn" id="btnNextWave">Next Round ▶</button><br>
+    <button class="soft-btn" id="btnWaveShop">⭐ Shop</button>
     <button class="soft-btn" id="btnWaveHome">🏠 Home</button>
   </div>
 </div>
@@ -635,11 +737,25 @@ button.hud-pill:active{ transform:scale(.94); }
   <div class="card">
     <h2>The snacks are gone! 😮</h2>
     <div class="sub">The sneaky troops ate everything… time to restock!</div>
-    <div style="font-size:44px; margin:6px 0;">🐑🐐🍞🍚</div>
+    <div style="font-size:44px; margin:6px 0;">🐑🍞🧀🍎🎃</div>
     <div class="stat-line" id="overStat">You earned 5 ⭐ — great defending!</div>
     <br>
     <button class="big-btn" id="btnRetry">Play Again ▶</button><br>
     <button class="soft-btn" id="btnOverHome">🏠 Home</button>
+  </div>
+</div>
+
+<!-- ============ STAR SHOP ============ -->
+<div id="scrShop" class="overlay dimmed hidden">
+  <div id="shopInner">
+    <div id="shopHead">
+      <h2>⭐ Star Shop</h2>
+      <div id="shopWallet">⭐ 0</div>
+    </div>
+    <div id="shopScroll"></div>
+    <div id="shopFoot">
+      <button class="big-btn blue" id="btnShopDone">✔ &nbsp;Done</button>
+    </div>
   </div>
 </div>
 
@@ -673,14 +789,20 @@ function el(tag, attrs, parent){
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function tween(dur, fn){
+  // rAF for smoothness, with a timeout backstop so a throttled/hidden
+  // tab can never freeze the game loop mid-animation
   return new Promise(res => {
     const t0 = performance.now();
-    function step(now){
-      const t = Math.min(1, (now - t0) / dur);
+    let raf = 0, timer = 0;
+    function step(){
+      raf = 0; clearTimeout(timer);
+      const t = Math.min(1, (performance.now() - t0) / dur);
       fn(t);
-      if(t < 1) requestAnimationFrame(step); else res();
+      if(t >= 1){ res(); return; }
+      raf = requestAnimationFrame(step);
+      timer = setTimeout(() => { cancelAnimationFrame(raf); step(); }, 150);
     }
-    requestAnimationFrame(step);
+    step();
   });
 }
 const easeOut  = t => 1 - Math.pow(1 - t, 3);
@@ -727,8 +849,40 @@ const WORDS = {
   Y:[['🪀','Yo-yo'],['🥱','Yawn']],
   Z:[['🦓','Zebra'],['🤐','Zipper']]
 };
-const TREATS = ['🐑','🐐','🍞','🍚'];
-const TREAT_NAMES = {'🐑':'sheep','🐐':'goat','🍞':'bread','🍚':'rice'};
+const TREATS = ['🐑','🐐','🍞','🍚','🧀','🍯','🥧','🍎','🥕','🌽','🥚','🥛','🐔','🎃'];
+const TREAT_NAMES = {'🐑':'sheep','🐐':'goat','🍞':'bread','🍚':'rice','🧀':'cheese','🍯':'honey','🥧':'pie','🍎':'apple','🥕':'carrot','🌽':'corn','🥚':'egg','🥛':'milk','🐔':'hen','🎃':'pumpkin'};
+/* Word Builder: emoji + word pairs (3- and 4-letter, picture-friendly) */
+const WB_WORDS = [
+  ['🐱','CAT'],['🐶','DOG'],['☀️','SUN'],['🐝','BEE'],['🐷','PIG'],['🐮','COW'],
+  ['🦉','OWL'],['🦊','FOX'],['🚌','BUS'],['🚗','CAR'],['🥚','EGG'],['🎩','HAT'],
+  ['🔑','KEY'],['🐜','ANT'],['🛏️','BED'],['🥤','CUP'],['🥧','PIE'],['🥜','NUT'],
+  ['🐛','BUG'],['🐔','HEN'],['📦','BOX'],['💎','GEM'],['🧊','ICE'],['🗺️','MAP'],
+  ['🖊️','PEN'],['🕸️','WEB'],['🦇','BAT'],['🐀','RAT'],['🚐','VAN'],['🪵','LOG'],
+  ['🪚','SAW'],['🪓','AXE'],['🦵','LEG'],['👂','EAR'],
+  ['🐸','FROG'],['🐟','FISH'],['🐦','BIRD'],['🦆','DUCK'],['🎂','CAKE'],['⭐','STAR'],
+  ['🌙','MOON'],['🌳','TREE'],['🚢','SHIP'],['🪁','KITE'],['🦁','LION'],['🐻','BEAR'],
+  ['🌽','CORN'],['🥛','MILK'],['🧦','SOCK'],['💍','RING'],['🥁','DRUM'],['🦀','CRAB'],
+  ['🔔','BELL'],['📖','BOOK'],['👢','BOOT'],['🐐','GOAT'],['🚪','DOOR'],['🤴','KING'],
+  ['🌹','ROSE'],['🪱','WORM']
+];
+/* Numbers mode: countable emoji with singular/plural names */
+const COUNT_EMOJI = [
+  ['🍎','apple','apples'],['⭐','star','stars'],['🎈','balloon','balloons'],
+  ['🍪','cookie','cookies'],['🐤','chick','chicks'],['🐞','ladybug','ladybugs'],
+  ['🌼','flower','flowers'],['🦋','butterfly','butterflies'],['🍓','strawberry','strawberries'],
+  ['🐸','frog','frogs'],['🧁','cupcake','cupcakes'],['🐠','fish','fish'],
+  ['🚗','car','cars'],['🐢','turtle','turtles']
+];
+const NUM_WORDS = ['','one','two','three','four','five','six','seven','eight','nine','ten'];
+/* Campaign: the default journey through the modes (each stage = one round) */
+const CAMPAIGN_DEFAULT = [
+  { mode:'letters', matchStyle:'ul', optionCount:3 },
+  { mode:'letters', matchStyle:'ul', optionCount:4 },
+  { mode:'letters', matchStyle:'lu', optionCount:4 },
+  { mode:'letters', matchStyle:'lu', optionCount:5 },
+  { mode:'sounds', soundsCase:'lower', optionCount:3 },
+  { mode:'sounds', soundsCase:'upper', optionCount:4 }
+];
 const TROOP_COLORS = [['#e2574c','#b13d34'],['#4f9dde','#356fa3'],['#8e6fc1','#67498f'],['#4db36b','#33824a'],['#e6a23c','#b3782a'],['#d96aa7','#a3477b']];
 const PRAISE = ['Great job!','You got it!','Amazing!','Wonderful!','Hooray!','Super!'];
 const GENTLE = ['Almost! Try again!','Keep looking!','You can do it!','Hmm, not that one!'];
@@ -739,20 +893,72 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
 const DEFAULTS = {
-  mode:'letters', matchStyle:'lu',
+  mode:'campaign', matchStyle:'lu',
   letters: ALPHA.slice(),
   teams: ['SH','CH','TH','WH','QU'],
-  optionCount:3, difficulty:'easy', waveLength:8, pantrySize:5,
-  sfx:true, voice:true
+  optionCount:3, difficulty:'steady', waveLength:8, pantrySize:5,
+  wordLen:'3', soundsCase:'lower', numMax:'5',
+  campaign: CAMPAIGN_DEFAULT,
+  sfx:true, voice:true, phonics:true
 };
-let S = Object.assign({}, DEFAULTS, store.get('lc.settings.v1', {}));
+const storedSettings = store.get('lc.settings.v1', null);
+let S = Object.assign({}, DEFAULTS, storedSettings || {});
+/* settings saved before campaign existed: campaign becomes the new default */
+if(storedSettings && storedSettings.campaign === undefined) S.mode = 'campaign';
 S.letters = (S.letters || []).filter(l => ALPHA.includes(l));
 S.teams = (S.teams || []).filter(t => TEAMS_ALL.includes(t));
 if(S.letters.length < 2) S.letters = ALPHA.slice();
 if(S.teams.length < 2) S.teams = DEFAULTS.teams.slice();
+S.campaign = JSON.parse(JSON.stringify(Array.isArray(S.campaign) && S.campaign.length ? S.campaign : CAMPAIGN_DEFAULT));
+
+/* per-stage setting overrides while a campaign round is running */
+let OV = null;
+const cfg = k => (OV && OV[k] !== undefined) ? OV[k] : S[k];
 function saveSettings(){ store.set('lc.settings.v1', S); }
 let STATS = store.get('lc.stats.v1', {});
 let totalStars = store.get('lc.stars.v1', 0);
+/* star shop: bought decorations persist per device */
+const SHOP_ITEMS = [
+  { id:'bunting', icon:'🎀', name:'Party Bunting', desc:'Cheerful little flags across the castle wall', cost:8 },
+  { id:'flags',   icon:'🌈', name:'Rainbow Flags', desc:'Bright new flags for every tower', cost:12 },
+  { id:'garden',  icon:'🌻', name:'Castle Garden', desc:'Sunflowers and blossoms along the wall', cost:18 },
+  { id:'banners', icon:'👑', name:'Royal Banners', desc:'Grand star banners on the gatehouse', cost:25 },
+  { id:'dragon',  icon:'🐲', name:'Pet Dragon', desc:'Guards the gate! Once each round he scares away a troop that gets too close', cost:40 }
+];
+let SHOP = store.get('lc.shop.v1', { owned:[], shown:{} });
+if(!Array.isArray(SHOP.owned)) SHOP.owned = [];
+if(!SHOP.shown || typeof SHOP.shown !== 'object') SHOP.shown = {};
+/* campaign progress (which stage the child is on) */
+const Campaign = {
+  data: store.get('lc.campaign.v1', { stage:0 }),
+  stages(){ return Array.isArray(S.campaign) && S.campaign.length ? S.campaign : CAMPAIGN_DEFAULT; },
+  current(){
+    if(this.data.stage >= this.stages().length || this.data.stage < 0) this.data.stage = 0;
+    return this.stages()[this.data.stage];
+  },
+  save(){ store.set('lc.campaign.v1', this.data); },
+  advance(){
+    this.data.stage++;
+    const finished = this.data.stage >= this.stages().length;
+    if(finished) this.data.stage = 0;
+    this.save();
+    return finished;
+  },
+  reset(){ this.data.stage = 0; this.save(); }
+};
+function stageDesc(st){
+  if(!st) return '';
+  const n = `${st.optionCount || 3} choices`;
+  if(st.mode === 'sounds'){
+    const c = st.soundsCase === 'upper' ? 'UPPERCASE' : st.soundsCase === 'both' ? 'Aa' : 'lowercase';
+    return `First Sounds (${c} answers) • ${n}`;
+  }
+  if(st.mode === 'teams') return `Letter Teams • ${n}`;
+  if(st.mode === 'words') return `Word Builder • ${n}`;
+  if(st.mode === 'numbers') return `Numbers • ${n}`;
+  const m = { ul:'UPPERCASE → lowercase', lu:'lowercase → UPPERCASE', uu:'UPPERCASE match', ll:'lowercase match', mixed:'Mixed matching' };
+  return `${m[st.matchStyle] || 'Letter Match'} • ${n}`;
+}
 function recordStat(sym, wrongs){
   const st = STATS[sym] || { att:0, wrong:0, first:0 };
   st.att++; st.wrong += wrongs; if(wrongs === 0) st.first++;
@@ -805,7 +1011,9 @@ const SFX = {
   sneak(){ [392, 370, 349, 330].forEach((f, i) => note(f, i * .12, .1, 'square', .15)); },
   fanfare(){ [523, 523, 659, 784, 1047].forEach((f, i) => note(f, i * .13, .25, 'triangle', .4)); },
   sad(){ [440, 392, 330, 262].forEach((f, i) => note(f, i * .22, .3, 'triangle', .3)); },
-  pop(){ note(620, 0, .07, 'triangle', .35); }
+  pop(){ note(620, 0, .07, 'triangle', .35); },
+  roar(){ note(110, 0, .3, 'sawtooth', .3); note(82, .12, .35, 'sawtooth', .35); noiseBurst(0, .3, 300, 120, .25, 'lowpass'); },
+  flame(){ noiseBurst(0, .4, 900, 250, .5, 'lowpass'); }
 };
 function play(name){ if(S.sfx && AC) SFX[name] && SFX[name](); }
 
@@ -821,6 +1029,47 @@ function speak(text){
   }catch(e){}
 }
 function spellOut(team){ return team.split('').join(', '); }
+
+/* ---------------- parent-recorded phonics (sounds/ folder) ---------------- */
+const Phonics = {
+  manifest:{}, cache:{},
+  async load(){
+    let m = null;
+    try{ const r = await fetch('sounds/manifest.json?b=' + Date.now()); if(r.ok) m = await r.json(); }catch(e){}
+    if(!m){ try{ const r2 = await fetch('sounds/manifest.json'); if(r2.ok) m = await r2.json(); }catch(e){} }
+    this.manifest = m && typeof m === 'object' ? m : {};
+  },
+  count(){ return Object.keys(this.manifest).length; },
+  keyFor(q){
+    if(S.phonics === false || !q || q.mode === 'numbers') return null;
+    const k = String(q.target || '').toLowerCase();
+    return this.manifest[k] ? k : null;
+  },
+  play(key){
+    return new Promise(res => {
+      try{
+        let a = this.cache[key];
+        if(!a){ a = new Audio('sounds/' + this.manifest[key]); this.cache[key] = a; }
+        const done = () => { clearTimeout(tm); a.onended = a.onerror = null; res(); };
+        const tm = setTimeout(done, 3500);
+        a.onended = done; a.onerror = done;
+        a.currentTime = 0;
+        a.play().catch(done);
+      }catch(e){ res(); }
+    });
+  },
+  /* parent's recorded sound first (if there is one), then the spoken sentence */
+  async sayWith(q, text){
+    const k = this.keyFor(q);
+    if(k){
+      if(canSpeak){ try{ speechSynthesis.cancel(); }catch(e){} }
+      await this.play(k);
+      await sleep(100);
+    }
+    speak(text);
+  },
+  say(q){ return this.sayWith(q, q.speech); }
+};
 
 /* ================================================================
    SCENE — generated terrain, decorations, responsive viewBox
@@ -1053,7 +1302,7 @@ function fxParticles(x, y, items){
   const g = el('g', { transform:`translate(${x} ${y})` }, fxLayer());
   for(const it of items){
     const n = el(it.tag, it.attrs, g);
-    n.classList.add(it.cls || 'part');
+    (it.cls || 'part').split(' ').forEach(c => n.classList.add(c));
     n.style.setProperty('--dx', it.dx + 'px');
     n.style.setProperty('--dy', it.dy + 'px');
     if(it.s) n.style.setProperty('--s', it.s);
@@ -1130,8 +1379,9 @@ const Paddock = {
     const g = $('#paddockItems');
     g.innerHTML = '';
     this.items = [];
+    const pool = shuffle(TREATS); // a different mix of snacks every game
     for(let i = 0; i < n; i++){
-      const emoji = TREATS[i % TREATS.length];
+      const emoji = pool[i % pool.length];
       const row = Math.floor(i / 4), col = i % 4;
       const x = 1396 + col * 52 + (row ? 26 : 0), y = 818 - row * 34;
       const t = el('text', { x, y, 'font-size':34, 'text-anchor':'middle' }, g);
@@ -1147,6 +1397,295 @@ const Paddock = {
     fxPoof(x, y - 12);
     it.el.remove();
     return it.emoji;
+  }
+};
+
+/* ================================================================
+   WORD SIGN (Word Builder mode: defeated letters drop into slots)
+   ================================================================ */
+const WordSign = {
+  X:600, TOP:775, idx:0, slots:[], word:'', emojiEl:null,
+  layer(){ return $('#wordSignG'); },
+  build(emoji, word){
+    this.clear();
+    this.word = word; this.idx = 0;
+    const n = word.length, slotW = 40, gap = 8;
+    const innerW = 64 + n * (slotW + gap) + 8;
+    const x0 = this.X - innerW / 2;
+    const g = el('g', {}, this.layer());
+    el('rect', { x:x0 + 12, y:this.TOP + 22, width:9, height:72, rx:4, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2.5 }, g);
+    el('rect', { x:x0 + innerW - 21, y:this.TOP + 22, width:9, height:72, rx:4, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2.5 }, g);
+    el('rect', { x:x0, y:this.TOP, width:innerW, height:58, rx:12, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3.5 }, g);
+    const em = el('text', { x:x0 + 34, y:this.TOP + 41, 'text-anchor':'middle', 'font-size':34 }, g);
+    em.textContent = emoji;
+    this.emojiEl = em;
+    for(let i = 0; i < n; i++){
+      const sx = x0 + 60 + i * (slotW + gap);
+      const r = el('rect', { x:sx, y:this.TOP + 9, width:slotW, height:40, rx:8, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':2.5 }, g);
+      const t = el('text', { x:sx + slotW / 2, y:this.TOP + 40, 'text-anchor':'middle', 'font-size':28, fill:'#e3d7b8', 'font-weight':'800' }, g);
+      t.textContent = word[i].toLowerCase();
+      t.style.fontFamily = 'inherit';
+      this.slots.push({ rect:r, text:t, cx:sx + slotW / 2, cy:this.TOP + 29 });
+    }
+    this.mark();
+    // pop in
+    const cx = this.X, cy = this.TOP + 40;
+    return tween(300, t => {
+      const s = easeOut(t);
+      g.setAttribute('transform', `translate(${cx * (1 - s)} ${cy * (1 - s)}) scale(${s})`);
+    }).then(() => g.removeAttribute('transform'));
+  },
+  mark(){
+    this.slots.forEach((s, i) => {
+      s.rect.setAttribute('stroke', i === this.idx ? '#ff8a5c' : '#d9c79a');
+      s.rect.setAttribute('stroke-width', i === this.idx ? 4.5 : 2.5);
+    });
+  },
+  /* the defeated troop's letter arcs from (x,y) into the next slot */
+  async dropFrom(x, y){
+    const s = this.slots[this.idx];
+    if(!s) return;
+    const fly = el('text', { 'text-anchor':'middle', 'font-size':36, fill:'#27355c', 'font-weight':'800', stroke:'#ffffff', 'stroke-width':5, 'paint-order':'stroke' }, this.layer());
+    fly.textContent = this.word[this.idx].toLowerCase();
+    fly.style.fontFamily = 'inherit';
+    await tween(700, t => {
+      const k = easeInOut(t);
+      const fx2 = lerp(x, s.cx, k);
+      const fy = lerp(y, s.cy + 11, k) - 130 * 4 * t * (1 - t) * .5;
+      fly.setAttribute('transform', `translate(${fx2} ${fy}) rotate(${(1 - t) * -24}) scale(${1 - .15 * t})`);
+    });
+    fly.remove();
+    s.text.setAttribute('fill', '#27355c');
+    fxFloatText(s.cx, s.cy - 18, '✦', '#ffc83d');
+    play('pok');
+    this.idx++;
+    this.mark();
+  },
+  /* whole word done: bounce, sparkle, bonus star */
+  async celebrate(){
+    play('yay');
+    speak(`${this.word.split('').join(', ')}. ${this.word.toLowerCase()}! ${pickRand(PRAISE)}`);
+    fxBurst(this.X, this.TOP + 6);
+    Game.sessionStars++; totalStars++; store.set('lc.stars.v1', totalStars);
+    Game.waveBonus = (Game.waveBonus || 0) + 1;
+    Game.updateHUD();
+    fxFloatText(this.X, this.TOP - 12, '+1 ⭐');
+    const em = this.emojiEl;
+    if(em){
+      const ex = +em.getAttribute('x'), ey = +em.getAttribute('y') - 12;
+      await tween(900, t => {
+        const s = 1 + .9 * Math.sin(Math.PI * t);
+        em.setAttribute('transform', `translate(${ex * (1 - s)} ${ey * (1 - s)}) scale(${s})`);
+      });
+      em.removeAttribute('transform');
+    }
+    await sleep(350);
+  },
+  clear(){
+    const l = this.layer();
+    if(l) l.innerHTML = '';
+    this.slots = []; this.idx = 0; this.emojiEl = null;
+  }
+};
+
+/* ================================================================
+   STAR SHOP — decorations bought with stars
+   ================================================================ */
+function buildBunting(deco){
+  const A = { x:1256, y:468 }, C = { x:1356, y:514 }, B = { x:1452, y:420 };
+  el('path', { d:`M ${A.x} ${A.y} Q ${C.x} ${C.y} ${B.x} ${B.y}`, fill:'none', stroke:'#fff8ea', 'stroke-width':3 }, deco);
+  const cols = ['#e2574c','#ffc83d','#4f9dde','#46c07a','#d96aa7','#ff9d2e'];
+  for(let i = 1; i <= 8; i++){
+    const t = i / 9;
+    const x = (1 - t) * (1 - t) * A.x + 2 * (1 - t) * t * C.x + t * t * B.x;
+    const y = (1 - t) * (1 - t) * A.y + 2 * (1 - t) * t * C.y + t * t * B.y;
+    el('path', { d:`M ${x - 7} ${y} L ${x + 7} ${y} L ${x} ${y + 14} Z`, fill:cols[i % 6], stroke:'#ffffff', 'stroke-width':1.5 }, deco);
+  }
+}
+function buildRainbowFlags(deco){
+  const mk = (x, y, w, h, idx, delay) => {
+    const g = el('g', { class:'flag' }, deco);
+    if(delay) g.style.animationDelay = delay;
+    const cp = el('clipPath', { id:'rb' + idx }, g);
+    el('path', { d:`M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h} Z` }, cp);
+    const gg = el('g', { 'clip-path':`url(#rb${idx})` }, g);
+    const cols = ['#e2574c','#ff9d2e','#ffe27a','#46c07a','#4f9dde'];
+    cols.forEach((c, i) => el('rect', { x, y:y + h * i / 5, width:w, height:h / 5 + .6, fill:c }, gg));
+    el('path', { d:`M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h} Z`, fill:'none', stroke:'#ffffff', 'stroke-width':1.5, opacity:.6 }, g);
+  };
+  mk(1456, 250, 46, 22, 1);
+  mk(1302, 416, 44, 20, 2, '-.8s');
+  el('line', { x1:1581, y1:368, x2:1581, y2:330, stroke:'#7b8494', 'stroke-width':4 }, deco);
+  mk(1581, 330, 42, 20, 3, '-1.6s');
+}
+function buildBanners(deco){
+  const mk = (x, color, dark, delay) => {
+    const g = el('g', { class:'bannerSway' }, deco);
+    if(delay) g.style.animationDelay = delay;
+    el('path', { d:`M ${x} 528 h 26 v 54 l -13 -10 l -13 10 Z`, fill:color, stroke:dark, 'stroke-width':2.5 }, g);
+    el('rect', { x:x - 3, y:524, width:32, height:6, rx:3, fill:'#8d5a33' }, g);
+    const t = el('text', { x:x + 13, y:553, 'text-anchor':'middle', 'font-size':14 }, g);
+    t.textContent = '⭐';
+  };
+  mk(1258, '#c0392b', '#8e2f23');
+  mk(1330, '#3f6f9e', '#2e5377', '-1.7s');
+}
+function buildGarden(deco){
+  el('rect', { x:1368, y:744, width:206, height:11, rx:5, fill:'#7a5230', stroke:'#5d3c20', 'stroke-width':2 }, deco);
+  const flowers = ['#ff6b8a','#ffe27a','#cdb4ff','#ff9d2e','#ffffff'];
+  for(let i = 0; i < 9; i++){
+    const x = 1378 + i * 23, y = 745;
+    el('line', { x1:x, y1:y, x2:x, y2:y - 10, stroke:'#3e8a3e', 'stroke-width':2.5 }, deco);
+    el('circle', { cx:x, cy:y - 13, r:4.5, fill:flowers[i % 5] }, deco);
+    el('circle', { cx:x, cy:y - 13, r:1.8, fill:'#f5a623' }, deco);
+  }
+  const emo = (ch, x, y, fs) => { const t = el('text', { x, y, 'text-anchor':'middle', 'font-size':fs }, deco); t.textContent = ch; };
+  emo('🌻', 1372, 748, 22); emo('🌻', 1580, 746, 22); emo('🌻', 1476, 750, 26);
+  emo('🪴', 1262, 738, 19); emo('🪴', 1344, 738, 19);
+}
+function buildDragon(){
+  const g = $('#dragonG');
+  g.setAttribute('transform', `translate(${Dragon.PX} ${Dragon.PY})`);
+  const b = el('g', { id:'dragonBody' }, g);
+  el('path', { class:'dtail', d:'M 14 -12 C 30 -10 40 -22 34 -36 C 31 -43 24 -44 22 -38', fill:'none', stroke:'#5fbf77', 'stroke-width':7, 'stroke-linecap':'round' }, b);
+  el('ellipse', { cx:-6, cy:-3, rx:6, ry:4.5, fill:'#4da566' }, b);
+  el('ellipse', { cx:8, cy:-3, rx:6, ry:4.5, fill:'#4da566' }, b);
+  el('ellipse', { cx:2, cy:-17, rx:16, ry:14, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
+  el('ellipse', { cx:-2, cy:-14, rx:8.5, ry:8.5, fill:'#cdeec2' }, b);
+  el('path', { d:'M -4 -30 l 4 -5 l 3 5 M 4 -29 l 4 -5 l 3 5', fill:'none', stroke:'#3f9457', 'stroke-width':2.5, 'stroke-linejoin':'round' }, b);
+  el('path', { class:'dwing', d:'M 6 -26 Q 16 -46 30 -40 Q 24 -32 14 -24 Z', fill:'#8fd6a0', stroke:'#3f9457', 'stroke-width':2 }, b);
+  el('circle', { cx:-15, cy:-33, r:10.5, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
+  el('rect', { x:-33, y:-34, width:14, height:9, rx:4.5, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
+  el('circle', { cx:-29, cy:-31.5, r:1.3, fill:'#3f9457' }, b);
+  el('path', { d:'M -21 -41 l -3 -7 l 6 2 Z M -12 -42 l -1 -8 l 6 4 Z', fill:'#ffe2ad', stroke:'#d9a05f', 'stroke-width':1.5 }, b);
+  const eye = el('g', { class:'deye' }, b);
+  el('circle', { cx:-18, cy:-36, r:3.2, fill:'#ffffff' }, eye);
+  el('circle', { cx:-19.2, cy:-36, r:1.7, fill:'#27355c' }, eye);
+}
+const Dragon = {
+  PX:1466, PY:357, busy:false,
+  setPos(x, y){ $('#dragonG').setAttribute('transform', `translate(${x} ${y})`); },
+  visible(){ return Shop.on('dragon'); },
+  canRescue(troop, stepLen){
+    return this.visible() && !Game.dragonUsed && troop.t + stepLen >= .999;
+  },
+  /* swoop from the perch, puff flame, send the troop scurrying back */
+  async rescue(troop, backT){
+    Game.dragonUsed = true; this.busy = true;
+    const g = $('#dragonG');
+    g.classList.add('flying');
+    play('roar');
+    speak('Dragon to the rescue!');
+    const to = { x:troop.x + 95, y:troop.y - 100 };
+    await tween(900, t => {
+      const k = easeInOut(t);
+      this.setPos(lerp(this.PX, to.x, k), lerp(this.PY, to.y, k) - 140 * 4 * t * (1 - t) * .35);
+    });
+    play('flame');
+    const items = [];
+    for(let i = 0; i < 9; i++){
+      items.push({ tag:'circle', attrs:{ r:rand(4, 8), fill:pickRand(['#ff9d2e','#ffc83d','#ff6b4a']), opacity:.95 }, dx:rand(-95, -40), dy:rand(40, 85), s:1.8 });
+    }
+    fxParticles(to.x - 28, to.y - 30, items);
+    fxFloatText(troop.x, troop.y - 84, '!', '#e2574c');
+    await sleep(220);
+    const run = troop.walkTo(backT, 1100, 'running');
+    const home = tween(900, t => {
+      const k = easeInOut(t);
+      this.setPos(lerp(to.x, this.PX, k), lerp(to.y, this.PY, k) - 80 * 4 * t * (1 - t));
+    });
+    await Promise.all([run, home]);
+    g.classList.remove('flying');
+    this.busy = false;
+  },
+  startIdle(){
+    const blink = () => {
+      const e = document.querySelector('#dragonG .deye');
+      if(e && this.visible() && !this.busy){ e.style.transform = 'scaleY(.15)'; setTimeout(() => { e.style.transform = ''; }, 130); }
+      setTimeout(blink, rand(2800, 7000));
+    };
+    setTimeout(blink, 3000);
+    const puff = () => {
+      if(this.visible() && !this.busy && document.visibilityState !== 'hidden'){
+        const items = [];
+        for(let i = 0; i < 3; i++){
+          items.push({ tag:'circle', attrs:{ r:rand(2.5, 4.5), fill:'#b9c2cc', opacity:.8 }, dx:rand(-16, -6) - i * 4, dy:rand(-30, -18) - i * 6, s:2.2, cls:'part part-slow' });
+        }
+        fxParticles(this.PX - 30, this.PY - 32, items);
+      }
+      setTimeout(puff, rand(8000, 20000));
+    };
+    setTimeout(puff, 5000);
+  }
+};
+function applyDecor(){
+  const deco = $('#castleDecoG');
+  deco.innerHTML = '';
+  const rainbow = Shop.on('flags');
+  $('#flag1').style.display = rainbow ? 'none' : '';
+  $('#flag2').style.display = rainbow ? 'none' : '';
+  if(Shop.on('bunting')) buildBunting(deco);
+  if(rainbow) buildRainbowFlags(deco);
+  if(Shop.on('banners')) buildBanners(deco);
+  if(Shop.on('garden')) buildGarden(deco);
+  $('#dragonG').style.display = Shop.on('dragon') ? '' : 'none';
+}
+const Shop = {
+  returnTo:'title',
+  has(id){ return SHOP.owned.includes(id); },
+  on(id){ return this.has(id) && SHOP.shown[id] !== false; },
+  save(){ store.set('lc.shop.v1', SHOP); },
+  open(returnTo){
+    this.returnTo = returnTo || 'title';
+    this.renderCards();
+    UI.show('shop');
+  },
+  refreshWallet(){ $('#shopWallet').textContent = `⭐ ${totalStars}`; },
+  renderCards(){
+    const box = $('#shopScroll');
+    box.innerHTML = '';
+    for(const it of SHOP_ITEMS){
+      const card = document.createElement('div');
+      card.className = 'shop-card';
+      card.innerHTML = `<div class="shop-icon">${it.icon}</div><div class="shop-info"><div class="shop-name">${it.name}</div><div class="shop-desc">${it.desc}</div></div>`;
+      const btn = document.createElement('button');
+      if(this.has(it.id)){
+        const onNow = this.on(it.id);
+        btn.className = 'shop-toggle' + (onNow ? ' on' : '');
+        btn.textContent = onNow ? '✔ On' : 'Off';
+        btn.addEventListener('click', () => {
+          SHOP.shown[it.id] = !this.on(it.id);
+          this.save(); applyDecor(); this.renderCards(); play('pop');
+        });
+      } else {
+        btn.className = 'shop-buy' + (totalStars < it.cost ? ' cant' : '');
+        btn.textContent = `${it.cost} ⭐`;
+        btn.addEventListener('click', () => this.buy(it.id, card));
+      }
+      card.appendChild(btn);
+      box.appendChild(card);
+    }
+    this.refreshWallet();
+  },
+  buy(id, card){
+    const it = SHOP_ITEMS.find(i => i.id === id);
+    if(!it || this.has(id)) return;
+    if(totalStars < it.cost){
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      play('aw');
+      speak('Earn more stars by stopping the troops!');
+      return;
+    }
+    totalStars -= it.cost;
+    store.set('lc.stars.v1', totalStars);
+    SHOP.owned.push(id);
+    SHOP.shown[id] = true;
+    this.save();
+    applyDecor();
+    this.renderCards();
+    play('fanfare');
+    confettiBlast();
+    speak(id === 'dragon' ? 'A pet dragon! He will guard the gate!' : 'Beautiful! The castle looks wonderful!');
   }
 };
 
@@ -1285,11 +1824,26 @@ class Troop {
     this.bannerG = el('g', { class:'banner' }, inner);
     el('line', { x1:17, y1:-12, x2:17, y2:-78, stroke:'#6c4426', 'stroke-width':3.5 }, this.bannerG);
     const isEmoji = q.mode === 'sounds';
-    const wide = (q.bannerText || '').length > 1 && !isEmoji;
-    el('rect', { x:18.5, y:-78, width:wide ? 46 : 38, height:30, rx:6, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':2.5 }, this.bannerG);
-    const txt = el('text', { x:18.5 + (wide ? 23 : 19), y:isEmoji ? -55 : -54.5, 'text-anchor':'middle', 'font-size':isEmoji ? 21 : (wide ? 17 : 23), fill:'#27355c', 'font-weight':'800' }, this.bannerG);
-    txt.textContent = q.bannerText;
-    txt.style.fontFamily = 'inherit';
+    if(q.mode === 'numbers' && q.count){
+      // a grid of emojis to count: one row up to 5, two rows above that
+      const n = q.count, rows = n > 5 ? 2 : 1, cols = Math.ceil(n / rows);
+      const bw = Math.max(34, cols * 13 + 8), bh = rows * 15 + 9;
+      el('rect', { x:18.5, y:-78, width:bw, height:bh, rx:6, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':2.5 }, this.bannerG);
+      for(let i = 0; i < n; i++){
+        const row = Math.floor(i / cols);
+        const inRow = row < rows - 1 ? cols : n - cols * (rows - 1);
+        const col = i - row * cols;
+        const x0 = 18.5 + bw / 2 - (inRow * 13) / 2;
+        const t = el('text', { x:x0 + col * 13 + 6.5, y:-78 + 12.5 + row * 14.5, 'text-anchor':'middle', 'font-size':11.5 }, this.bannerG);
+        t.textContent = q.emoji;
+      }
+    } else {
+      const wide = (q.bannerText || '').length > 1 && !isEmoji;
+      el('rect', { x:18.5, y:-78, width:wide ? 46 : 38, height:30, rx:6, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':2.5 }, this.bannerG);
+      const txt = el('text', { x:18.5 + (wide ? 23 : 19), y:isEmoji ? -55 : -54.5, 'text-anchor':'middle', 'font-size':isEmoji ? 21 : (wide ? 17 : 23), fill:'#27355c', 'font-weight':'800' }, this.bannerG);
+      txt.textContent = q.bannerText;
+      txt.style.fontFamily = 'inherit';
+    }
     this.place();
   }
   place(){
@@ -1373,11 +1927,13 @@ let lastTarget = null;
 function caseStr(s, c){ return c === 'lower' ? s.toLowerCase() : s.toUpperCase(); }
 function casePair(){
   const map = { lu:['lower','upper'], ul:['upper','lower'], uu:['upper','upper'], ll:['lower','lower'] };
-  const k = S.matchStyle === 'mixed' ? pickRand(['lu','ul','uu','ll']) : S.matchStyle;
+  const ms = cfg('matchStyle');
+  const k = ms === 'mixed' ? pickRand(['lu','ul','uu','ll']) : ms;
   return map[k] || map.lu;
 }
 function similarPool(target, pool, mode){
   if(mode === 'teams') return pool.filter(x => x !== target && (x[0] === target[0] || x[1] === target[1]));
+  if(mode === 'numbers') return pool.filter(x => x !== target && Math.abs(+x - +target) <= 2);
   const g = SIM_GROUPS.find(gr => gr.includes(target.toLowerCase()));
   return g ? pool.filter(x => x !== target && g.includes(x.toLowerCase())) : [];
 }
@@ -1398,24 +1954,52 @@ function pickDistractors(pool, full, target, n, preferSimilar, mode){
   }
   return out;
 }
+/* ---- adaptive targeting: tricky symbols quietly appear more often ---- */
+function adaptiveWeight(sym){
+  const st = STATS[sym];
+  if(!st || !st.att) return 1.6;            // brand new: worth exploring
+  const miss = st.wrong / (st.wrong + st.att);
+  if(miss === 0 && st.att >= 3) return .6;  // mastered: rests a little
+  return 1 + 3.5 * miss;                    // tricky: shows up more
+}
+function weightedPick(items, weightFn){
+  let total = 0;
+  const ws = items.map(it => { const w = Math.max(.05, weightFn(it)); total += w; return w; });
+  let r = Math.random() * total;
+  for(let i = 0; i < items.length; i++){ r -= ws[i]; if(r <= 0) return items[i]; }
+  return items[items.length - 1];
+}
 function makeQuestion(){
-  const mode = S.mode;
+  const mode = cfg('mode');
   let pool, full;
   if(mode === 'teams'){ pool = S.teams.length >= 2 ? S.teams : DEFAULTS.teams; full = TEAMS_ALL; }
+  else if(mode === 'numbers'){
+    const max = Math.max(2, +S.numMax || 5);
+    pool = Array.from({ length:max }, (_, i) => String(i + 1));
+    full = Array.from({ length:10 }, (_, i) => String(i + 1));
+  }
   else { pool = S.letters.length >= 2 ? S.letters : ALPHA; full = ALPHA; }
-  let target = pickRand(pool);
-  if(pool.length > 1){ let guard = 0; while(target === lastTarget && guard++ < 8) target = pickRand(pool); }
+  let target = weightedPick(pool, adaptiveWeight);
+  if(pool.length > 1){ let guard = 0; while(target === lastTarget && guard++ < 8) target = weightedPick(pool, adaptiveWeight); }
   lastTarget = target;
-  const distractors = pickDistractors(pool, full, target, S.optionCount - 1, S.difficulty === 'brave', mode);
+  const distractors = pickDistractors(pool, full, target, cfg('optionCount') - 1, S.difficulty === 'brave', mode);
   const options = shuffle([target, ...distractors]);
   const q = { mode, target, options, wrongs:0 };
   if(mode === 'sounds'){
     const entry = pickRand(WORDS[target] || [['❓', target]]);
     q.emoji = entry[0]; q.word = entry[1];
     q.bannerText = q.emoji;
-    q.answerCase = 'both';
-    q.promptText = 'What letter does it start with?';
-    q.speech = `${q.word}! What letter does ${q.word} start with?`;
+    q.answerCase = cfg('soundsCase') || 'lower';
+    q.promptText = `What letter makes the sound at the beginning of ${q.emoji}?`;
+    q.speech = `${q.word}! What letter makes the sound at the beginning of ${q.word}?`;
+  } else if(mode === 'numbers'){
+    const entry = pickRand(COUNT_EMOJI);
+    q.emoji = entry[0]; q.single = entry[1]; q.plural = entry[2];
+    q.count = +target;
+    q.bannerText = q.emoji;
+    q.answerCase = 'num';
+    q.promptText = `How many ${q.plural}?`;
+    q.speech = `How many ${q.plural} do you see?`;
   } else {
     const [pc, ac] = casePair();
     q.promptCase = pc; q.answerCase = ac;
@@ -1424,11 +2008,11 @@ function makeQuestion(){
       q.promptText = 'Find the matching team!';
       q.speech = `${spellOut(target)}! Find the matching team!`;
     } else if(pc === 'lower' && ac === 'upper'){
-      q.promptText = 'Find the capital letter!';
-      q.speech = `${target}! Find the big ${target}!`;
+      q.promptText = 'Find the uppercase letter!';
+      q.speech = `${target}! Find the uppercase ${target}!`;
     } else if(pc === 'upper' && ac === 'lower'){
-      q.promptText = 'Find the small letter!';
-      q.speech = `${target}! Find the small ${target}!`;
+      q.promptText = 'Find the lowercase letter!';
+      q.speech = `${target}! Find the lowercase ${target}!`;
     } else {
       q.promptText = 'Find the match!';
       q.speech = `${target}! Find the matching letter!`;
@@ -1437,8 +2021,37 @@ function makeQuestion(){
   return q;
 }
 function optionLabel(q, opt){
+  if(q.mode === 'numbers') return opt;
   if(q.answerCase === 'both') return opt.toUpperCase() + opt.toLowerCase();
   return caseStr(opt, q.answerCase);
+}
+/* ---- Word Builder questions ---- */
+function makeWordQuestion(emoji, word, li){
+  const target = word[li];
+  // distractors never come from the word itself, so spelling ahead can't mislead
+  const safe = ALPHA.filter(L => L === target || !word.includes(L));
+  const distractors = pickDistractors(safe, safe, target, cfg('optionCount') - 1, S.difficulty === 'brave', 'letters');
+  const q = { mode:'words', target, options:shuffle([target, ...distractors]), wrongs:0 };
+  q.answerCase = 'lower';
+  q.bannerText = target.toLowerCase();
+  q.emoji = emoji; q.word = word;
+  q.promptText = `Build the word: ${word.toLowerCase()}!`;
+  q.speech = li === 0
+    ? `${word.toLowerCase()}! Let's build ${word.toLowerCase()}! Find the ${target}!`
+    : `Find the ${target}!`;
+  return q;
+}
+function pickWords(n){
+  let list = WB_WORDS.filter(w => S.wordLen === 'both' || w[1].length === +S.wordLen);
+  if(list.length < n) list = WB_WORDS.slice();
+  const out = [], used = new Set();
+  for(let i = 0; i < n; i++){
+    const cands = list.filter(w => !used.has(w[1]));
+    const w = weightedPick(cands.length ? cands : list,
+      wb => wb[1].split('').reduce((s, L) => s + adaptiveWeight(L), 0) / wb[1].length);
+    used.add(w[1]); out.push(w);
+  }
+  return out;
 }
 
 /* ================================================================
@@ -1450,8 +2063,16 @@ const Bar = {
   hide(){ $('#bar').classList.add('hidden'); },
   render(q){
     this.current = q;
-    $('#chipSym').textContent = q.bannerText;
-    $('#chipSym').style.fontSize = (q.mode === 'sounds') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
+    const chip = $('#chipSym');
+    if(q.mode === 'numbers'){
+      chip.textContent = Array.from({ length:q.count }, () => q.emoji).join(' ');
+      chip.style.fontSize = q.count <= 3 ? '24px' : q.count <= 6 ? '17px' : '13px';
+      chip.style.lineHeight = '1.2';
+    } else {
+      chip.textContent = q.bannerText;
+      chip.style.fontSize = (q.mode === 'sounds') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
+      chip.style.lineHeight = '';
+    }
     $('#prompt').textContent = q.promptText;
     const box = $('#choices');
     box.innerHTML = '';
@@ -1474,7 +2095,7 @@ const Bar = {
   markBad(b){ b.classList.add('bad'); b.disabled = true; },
   markGood(b){ b.classList.add('good'); }
 };
-$('#chip').addEventListener('click', () => { if(Bar.current) speak(Bar.current.speech); });
+$('#chip').addEventListener('click', () => { if(Bar.current) Phonics.say(Bar.current); });
 
 /* ================================================================
    GAME
@@ -1484,14 +2105,33 @@ const Game = {
   waveHits:0, waveFirstTry:0,
   startT(){ return { easy:.12, steady:.24, brave:.4 }[S.difficulty] || .12; },
   steps(){
-    const n = S.optionCount;
+    const n = cfg('optionCount');
     if(S.difficulty === 'easy') return n + 2;
     if(S.difficulty === 'steady') return Math.max(2, n - 1);
     return Math.max(1, n - 2);
   },
-  updateHUD(){
+  updateHUD(cur, total){
+    if(cur !== undefined){ this._hudCur = cur; this._hudTotal = total; }
     $('#hudStars').textContent = this.sessionStars;
-    $('#hudWave').textContent = `${Math.min(this.troopIdx + 1, S.waveLength)}/${S.waveLength}`;
+    $('#hudWave').textContent = `${this._hudCur || 1}/${this._hudTotal || S.waveLength}`;
+  },
+  /* set up per-stage overrides (campaign) and the stage HUD pill */
+  prepareWave(){
+    if(S.mode === 'campaign'){
+      const st = Campaign.current() || {};
+      OV = {
+        mode: st.mode || 'letters',
+        matchStyle: st.matchStyle || S.matchStyle,
+        soundsCase: st.soundsCase || S.soundsCase,
+        optionCount: Math.min(5, Math.max(2, +st.optionCount || 3))
+      };
+      const sp = $('#hudStage');
+      sp.style.display = '';
+      sp.querySelector('span').textContent = `${Campaign.data.stage + 1}/${Campaign.stages().length}`;
+    } else {
+      OV = null;
+      $('#hudStage').style.display = 'none';
+    }
   },
   async start(fresh){
     this.token++;
@@ -1500,21 +2140,24 @@ const Game = {
       this.sessionStars = 0; this.waveNum = 1;
       Paddock.build(S.pantrySize);
     }
+    this.prepareWave();
     this.runWave(this.token);
   },
   async runWave(token){
-    this.waveHits = 0; this.waveFirstTry = 0;
+    if(cfg('mode') === 'words') return this.runWordWave(token);
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
+    this.waveTotal = S.waveLength;
     const stepCount = this.steps(), startT = this.startT();
     const stepLen = (1 - startT) / stepCount;
     for(this.troopIdx = 0; this.troopIdx < S.waveLength; this.troopIdx++){
       if(token !== this.token) return;
-      this.updateHUD();
+      this.updateHUD(Math.min(this.troopIdx + 1, S.waveLength), S.waveLength);
       const q = makeQuestion();
       const troop = new Troop(q);
       Bar.render(q);
       await troop.enter(startT, 1100);
       if(token !== this.token){ troop.g.remove(); return; }
-      speak(q.speech);
+      Phonics.say(q);
       Bar.setEnabled(true);
       const result = await this.battle(q, troop, stepLen, token);
       if(token !== this.token) return;
@@ -1524,6 +2167,46 @@ const Game = {
         return this.gameOver();
       }
       await sleep(250);
+    }
+    this.waveEnd();
+  },
+  /* Word Builder: each defeated troop drops its letter into the sign */
+  async runWordWave(token){
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
+    const words = pickWords(Math.max(2, Math.round(S.waveLength / 3)));
+    const total = words.reduce((s, w) => s + w[1].length, 0);
+    this.waveTotal = total;
+    const stepCount = this.steps(), startT = this.startT();
+    const stepLen = (1 - startT) / stepCount;
+    let num = 0;
+    for(const [emoji, word] of words){
+      if(token !== this.token) return;
+      await WordSign.build(emoji, word);
+      for(let li = 0; li < word.length; ){
+        if(token !== this.token) return;
+        this.updateHUD(Math.min(num + 1, total), total);
+        const q = makeWordQuestion(emoji, word, li);
+        q.onKo = hp => WordSign.dropFrom(hp.x, hp.y);
+        const troop = new Troop(q);
+        Bar.render(q);
+        await troop.enter(startT, 1100);
+        if(token !== this.token){ troop.g.remove(); return; }
+        Phonics.say(q);
+        Bar.setEnabled(true);
+        const result = await this.battle(q, troop, stepLen, token);
+        if(token !== this.token) return;
+        recordStat(q.target, q.wrongs);
+        if(result === 'defeated'){ li++; num++; }
+        else if(result === 'breached'){
+          if(Paddock.count() === 0){ await sleep(400); return this.gameOver(); }
+          // the letter got away — another troop brings the same letter
+        } else { return; }
+        await sleep(250);
+      }
+      await WordSign.celebrate();
+      if(token !== this.token) return;
+      WordSign.clear();
+      await sleep(300);
     }
     this.waveEnd();
   },
@@ -1545,10 +2228,15 @@ const Game = {
           this.updateHUD();
           fxFloatText(hp.x, hp.y - 50, `+${stars} ⭐`);
           play('yay');
-          if(q.mode === 'sounds') speak(`${q.target}! ${q.word} starts with ${q.target}! ${pickRand(PRAISE)}`);
-          else speak(pickRand(PRAISE));
+          let praiseText;
+          if(q.mode === 'sounds') praiseText = `${q.target}! ${q.word} starts with ${q.target}! ${pickRand(PRAISE)}`;
+          else if(q.mode === 'words') praiseText = `${q.target}! ${pickRand(PRAISE)}`;
+          else if(q.mode === 'numbers') praiseText = `${Array.from({ length:q.count }, (_, i) => i + 1).join(', ')}! ${NUM_WORDS[q.count]} ${q.count === 1 ? q.single : q.plural}! ${pickRand(PRAISE)}`;
+          else praiseText = pickRand(PRAISE);
+          Phonics.sayWith(q, praiseText);
+          const dropP = q.onKo ? q.onKo(hp) : Promise.resolve();
           await troop.ko();
-          await Catapult.reload();
+          await Promise.all([Catapult.reload(), dropP]);
           resolve('defeated');
         } else {
           Bar.markBad(btn);
@@ -1571,9 +2259,16 @@ const Game = {
             const emoji = await troop.steal();
             if(token !== this.token) return resolve('aborted');
             speak(`Oh no! They took the ${TREAT_NAMES[emoji] || 'snack'}!`);
+            await sleep(1500); // let the message finish before the next troop
+            if(token !== this.token) return resolve('aborted');
             resolve('breached');
           } else {
-            speak(pickRand(GENTLE));
+            if(Dragon.canRescue(troop, stepLen)){
+              await Dragon.rescue(troop, Math.max(.08, troop.t - stepLen * 2));
+              if(token !== this.token) return resolve('aborted');
+            } else {
+              speak(pickRand(GENTLE));
+            }
             Bar.setEnabled(true);
           }
         }
@@ -1582,14 +2277,34 @@ const Game = {
   },
   waveEnd(){
     play('fanfare');
-    speak('Castle defended! Hooray!');
     confettiBlast();
-    const acc = this.waveFirstTry / Math.max(1, S.waveLength);
+    let title = 'Castle Defended! 🎉', nextLabel = 'Next Round ▶', nextInfo = '', line = 'Castle defended! Hooray!';
+    if(S.mode === 'campaign'){
+      const wasStage = Campaign.data.stage;
+      const finished = Campaign.advance();
+      if(finished){
+        title = 'Campaign Complete! 🏆';
+        nextLabel = 'Start Again ▶';
+        nextInfo = 'Every stage finished — incredible!';
+        line = 'You finished the whole campaign! Hooray!';
+      } else {
+        title = `Stage ${wasStage + 1} Complete! 🎉`;
+        nextLabel = 'Next Stage ▶';
+        nextInfo = 'Next: ' + stageDesc(Campaign.current());
+        line = `Stage ${wasStage + 1} complete! Hooray!`;
+      }
+    }
+    speak(line);
+    $('#waveTitle').textContent = title;
+    $('#btnNextWave').textContent = nextLabel;
+    $('#waveNext').textContent = nextInfo;
+    const total = this.waveTotal || S.waveLength;
+    const acc = this.waveFirstTry / Math.max(1, total);
     const nStars = acc >= .85 ? 3 : acc >= .55 ? 2 : 1;
     const spans = $('#rateStars').querySelectorAll('span');
     spans.forEach(s => s.classList.remove('on'));
-    $('#waveStat1').textContent = `You earned ${this.waveHits + this.waveFirstTry} ⭐ this round!`;
-    $('#waveStat2').textContent = `${this.waveFirstTry} of ${S.waveLength} on the very first try!`;
+    $('#waveStat1').textContent = `You earned ${this.waveHits + this.waveFirstTry + (this.waveBonus || 0)} ⭐ this round!`;
+    $('#waveStat2').textContent = `${this.waveFirstTry} of ${total} on the very first try!`;
     UI.show('wave');
     spans.forEach((s, i) => { if(i < nStars) setTimeout(() => s.classList.add('on'), 350 + i * 380); });
   },
@@ -1603,6 +2318,7 @@ const Game = {
     this.token++;
     $('#troops').innerHTML = '';
     $('#fx').innerHTML = '';
+    WordSign.clear();
     Bar.onPick = null;
   }
 };
@@ -1618,6 +2334,8 @@ const Parade = {
       if(!this.on) return;
       const fakeQ = { mode:S.mode === 'sounds' ? 'sounds' : S.mode, bannerText:'', target:'A' };
       if(S.mode === 'sounds'){ const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = pickRand(WORDS[L] || [['🐌']])[0]; }
+      else if(S.mode === 'words'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(WB_WORDS)[0]; }
+      else if(S.mode === 'numbers'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(COUNT_EMOJI)[0]; }
       else if(S.mode === 'teams'){ fakeQ.bannerText = pickRand(S.teams.length ? S.teams : DEFAULTS.teams).toLowerCase(); }
       else { const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = Math.random() < .5 ? L : L.toLowerCase(); }
       const t = new Troop(fakeQ);
@@ -1645,6 +2363,7 @@ const UI = {
     $('#scrSettings').classList.toggle('hidden', name !== 'settings');
     $('#scrWave').classList.toggle('hidden', name !== 'wave');
     $('#scrOver').classList.toggle('hidden', name !== 'over');
+    $('#scrShop').classList.toggle('hidden', name !== 'shop');
     $('#scrLeave').classList.add('hidden');
     const inGame = name === 'game' || name === 'wave' || name === 'over';
     $('#hud').classList.toggle('hidden', !inGame);
@@ -1654,9 +2373,14 @@ const UI = {
   },
   refreshTitle(){
     $('#titleStars').textContent = `⭐ ${totalStars} stars collected`;
-    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds' };
+    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder', numbers:'Numbers', campaign:'Campaign' };
     const diffNames = { easy:'Relaxed', steady:'Steady', brave:'Brave' };
-    $('#modePill').textContent = `${modeNames[S.mode]} • ${S.optionCount} choices • ${diffNames[S.difficulty]}`;
+    if(S.mode === 'campaign'){
+      Campaign.current();
+      $('#modePill').textContent = `Campaign • Stage ${Campaign.data.stage + 1} of ${Campaign.stages().length} • ${diffNames[S.difficulty]}`;
+    } else {
+      $('#modePill').textContent = `${modeNames[S.mode]} • ${S.optionCount} choices • ${diffNames[S.difficulty]}`;
+    }
   }
 };
 
@@ -1689,8 +2413,10 @@ const Settings = {
   open(){
     T = JSON.parse(JSON.stringify(S));
     this.buildGrids();
+    this.buildCampaign();
     this.sync();
     this.buildStats();
+    $('#phonicsCount').textContent = Phonics.count() ? `(${Phonics.count()} recorded)` : '(none recorded yet)';
     UI.show('settings');
   },
   buildGrids(){
@@ -1725,13 +2451,72 @@ const Settings = {
       const k = b.dataset.key, v = b.dataset.val;
       b.classList.toggle('sel', String(T[k]) === v);
     });
-    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds');
-    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams');
+    $('#cardCampaign').classList.toggle('hidden', T.mode !== 'campaign');
+    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'campaign');
+    $('#cardSounds').classList.toggle('hidden', T.mode !== 'sounds');
+    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words' || T.mode === 'numbers');
     $('#cardTeams').classList.toggle('hidden', T.mode !== 'teams');
+    $('#cardWords').classList.toggle('hidden', T.mode !== 'words');
+    $('#cardNumbers').classList.toggle('hidden', T.mode !== 'numbers');
     document.querySelectorAll('#letterGrid .lchip').forEach(b => b.classList.toggle('sel', T.letters.includes(b.dataset.letter)));
     document.querySelectorAll('#teamGrid .lchip').forEach(b => b.classList.toggle('sel', T.teams.includes(b.dataset.team)));
     $('#swSfx').classList.toggle('on', T.sfx);
     $('#swVoice').classList.toggle('on', T.voice);
+    $('#swPhonics').classList.toggle('on', T.phonics !== false);
+  },
+  /* the editable list of campaign stages */
+  buildCampaign(){
+    if(!Array.isArray(T.campaign) || !T.campaign.length) T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT));
+    const box = $('#campList');
+    box.innerHTML = '';
+    const modeOpts = [['letters','Letter Match'],['sounds','First Sounds'],['teams','Letter Teams'],['words','Word Builder'],['numbers','Numbers']];
+    const styleOpts = {
+      letters:[['ul','B → b'],['lu','b → B'],['uu','B → B'],['ll','b → b'],['mixed','Mix 🎲']],
+      teams:[['ul','SH → sh'],['lu','sh → SH'],['uu','SH → SH'],['ll','sh → sh'],['mixed','Mix 🎲']],
+      sounds:[['lower','abc answers'],['upper','ABC answers'],['both','Aa answers']]
+    };
+    const mkSel = (opts, val, cls) => {
+      const s = document.createElement('select');
+      s.className = cls;
+      for(const [v, label] of opts){
+        const o = document.createElement('option');
+        o.value = v; o.textContent = label;
+        if(String(val) === v) o.selected = true;
+        s.appendChild(o);
+      }
+      return s;
+    };
+    T.campaign.forEach((st, i) => {
+      const row = document.createElement('div');
+      row.className = 'stage-row';
+      const num = document.createElement('span');
+      num.className = 'stage-num'; num.textContent = i + 1;
+      row.appendChild(num);
+      const selMode = mkSel(modeOpts, st.mode || 'letters', 'sel-mode');
+      selMode.addEventListener('change', () => { st.mode = selMode.value; Settings.buildCampaign(); });
+      row.appendChild(selMode);
+      if(st.mode === 'sounds'){
+        const s2 = mkSel(styleOpts.sounds, st.soundsCase || 'lower', 'sel-style');
+        s2.addEventListener('change', () => { st.soundsCase = s2.value; });
+        row.appendChild(s2);
+      } else if(!st.mode || st.mode === 'letters' || st.mode === 'teams'){
+        const s2 = mkSel(styleOpts[st.mode === 'teams' ? 'teams' : 'letters'], st.matchStyle || 'lu', 'sel-style');
+        s2.addEventListener('change', () => { st.matchStyle = s2.value; });
+        row.appendChild(s2);
+      }
+      const selN = mkSel([['2','2'],['3','3'],['4','4'],['5','5']], st.optionCount || 3, 'sel-n');
+      selN.addEventListener('change', () => { st.optionCount = +selN.value; });
+      row.appendChild(selN);
+      if(T.campaign.length > 1){
+        const x = document.createElement('button');
+        x.className = 'x'; x.textContent = '✕'; x.title = 'Remove stage';
+        x.addEventListener('click', () => { T.campaign.splice(i, 1); Settings.buildCampaign(); });
+        row.appendChild(x);
+      }
+      box.appendChild(row);
+    });
+    const cur = Math.min(Campaign.data.stage + 1, T.campaign.length);
+    $('#campProgress').textContent = `Saved progress: stage ${cur} of ${T.campaign.length}`;
   },
   buildStats(){
     const entries = Object.entries(STATS).filter(([k, v]) => v.att >= 2);
@@ -1745,7 +2530,7 @@ const Settings = {
       for(const [sym, v] of tricky){
         const d = document.createElement('span');
         d.className = 't-chip';
-        d.textContent = `${sym.length > 1 ? sym.toLowerCase() : sym + sym.toLowerCase()} · ${Math.round(100 * v.wrong / (v.wrong + v.att))}% missed`;
+        d.textContent = `${/^\d+$/.test(sym) ? sym : (sym.length > 1 ? sym.toLowerCase() : sym + sym.toLowerCase())} · ${Math.round(100 * v.wrong / (v.wrong + v.att))}% missed`;
         box.appendChild(d);
       }
     }
@@ -1793,9 +2578,14 @@ document.querySelectorAll('.quick-row button[data-quickt]').forEach(b => {
 });
 $('#swSfx').addEventListener('click', () => { T.sfx = !T.sfx; Settings.sync(); });
 $('#swVoice').addEventListener('click', () => { T.voice = !T.voice; Settings.sync(); });
+$('#swPhonics').addEventListener('click', () => { T.phonics = T.phonics === false; Settings.sync(); });
+$('#btnAddStage').addEventListener('click', () => { if(!T) return; T.campaign.push(JSON.parse(JSON.stringify(T.campaign[T.campaign.length - 1] || CAMPAIGN_DEFAULT[0]))); Settings.buildCampaign(); play('pop'); });
+$('#btnResetPlan').addEventListener('click', () => { if(!T) return; T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT)); Settings.buildCampaign(); play('pop'); });
+$('#btnRestartCamp').addEventListener('click', () => { Campaign.reset(); if(T) Settings.buildCampaign(); play('pop'); });
+$('#btnStudio').addEventListener('click', () => { S = T; saveSettings(); location.href = 'record.html'; });
 $('#btnVoiceTest').addEventListener('click', () => {
   const keep = S.voice; S.voice = true;
-  speak('Hello! B! Find the big B!');
+  speak('Hello! B! Find the uppercase B!');
   S.voice = keep;
 });
 $('#btnResetStats').addEventListener('click', () => {
@@ -1809,11 +2599,14 @@ $('#btnSettingsDone').addEventListener('click', () => Settings.close());
 /* ---------------- wiring ---------------- */
 $('#btnPlay').addEventListener('click', () => { audioInit(); play('fanfare'); Game.clearField(); Game.start(true); });
 $('#grownups').addEventListener('click', () => { audioInit(); Gate.open(); });
+$('#btnShop').addEventListener('click', () => { audioInit(); Shop.open('title'); });
+$('#btnWaveShop').addEventListener('click', () => Shop.open('wave'));
+$('#btnShopDone').addEventListener('click', () => UI.show(Shop.returnTo || 'title'));
 $('#gateCancel').addEventListener('click', () => UI.show('title'));
 $('#btnHome').addEventListener('click', () => { $('#scrLeave').classList.remove('hidden'); });
 $('#btnStay').addEventListener('click', () => { $('#scrLeave').classList.add('hidden'); });
 $('#btnLeave').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
-$('#btnNextWave').addEventListener('click', () => { Game.waveNum++; Game.clearField(); Game.token++; UI.show('game'); Game.runWave(Game.token); });
+$('#btnNextWave').addEventListener('click', () => { Game.waveNum++; Game.clearField(); Game.token++; UI.show('game'); Game.prepareWave(); Game.runWave(Game.token); });
 $('#btnWaveHome').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
 $('#btnRetry').addEventListener('click', () => { Game.clearField(); Game.start(true); });
 $('#btnOverHome').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
@@ -1830,6 +2623,10 @@ walkPathEl = $('#walkPath');
 walkLen = walkPathEl.getTotalLength();
 Catapult.init();
 Paddock.build(S.pantrySize);
+buildDragon();
+applyDecor();
+Dragon.startIdle();
+Phonics.load();
 fitView();
 ambientLoop();
 UI.show('title');
