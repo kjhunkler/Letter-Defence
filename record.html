@@ -100,6 +100,8 @@ h3{ font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#8d97b
   <div class="tip">
     Tap <b>●</b>, say the letter's <b>sound</b> — like <b>“buh”</b> for B, <b>“sss”</b> for S,
     <b>“mmm”</b> for M — and it stops by itself after 3 seconds (or tap ■ to stop sooner).
+    For <b>word endings</b> say the blended end out loud: <b>“at”</b>, <b>“og”</b>, <b>“up”</b> —
+    Word Joust plays them while the knights pause mid-charge.
     Short, clear and cheerful works best! Your child hears these in the game before the
     robot voice — or instead of it, if you turn the voice off in settings.
     Recordings are saved as files in the <b>sounds</b> folder next to the game.
@@ -110,6 +112,9 @@ h3{ font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#8d97b
 
   <h3>Letter Teams (for Letter Teams mode)</h3>
   <div class="grid" id="gridTeams"></div>
+
+  <h3>Word Endings (for Word Joust)</h3>
+  <div class="grid" id="gridRimes"></div>
 </main>
 
 <div id="toast"></div>
@@ -118,7 +123,9 @@ h3{ font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#8d97b
 'use strict';
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const TEAMS = ['sh','ch','th','wh','ph','qu','ck','ng'];
-const ALL = LETTERS.concat(TEAMS);
+/* word endings used by Word Joust (keep in sync with the game's CVC word list) */
+const RIMES = ['at','an','ap','ar','aw','ed','ee','eg','em','en','eb','ey','ig','ie','og','ow','ox','ug','un','up','us','ut'];
+const ALL = LETTERS.concat(TEAMS, RIMES);
 const $ = s => document.querySelector(s);
 
 let manifest = {};
@@ -159,10 +166,10 @@ function refreshCard(key){
 }
 function refreshAll(){ ALL.forEach(refreshCard); updateProgress(); }
 
-function makeCard(key, parent){
+function makeCard(key, parent, label){
   const root = document.createElement('div');
   root.className = 'scard';
-  const label = key.length === 1 ? key.toUpperCase() + key : key;
+  if(!label) label = key.length === 1 ? key.toUpperCase() + key : key;
   root.innerHTML = `<div class="sym">${label}</div><div class="meta"><div class="state"></div></div>`;
   const btns = document.createElement('div');
   btns.className = 'btns';
@@ -262,6 +269,7 @@ async function delKey(key){
 async function init(){
   LETTERS.forEach(k => makeCard(k, $('#gridLetters')));
   TEAMS.forEach(k => makeCard(k, $('#gridTeams')));
+  RIMES.forEach(k => makeCard(k, $('#gridRimes'), '-' + k));
   try{
     const p = await fetch('/ping');
     const j = await p.json();

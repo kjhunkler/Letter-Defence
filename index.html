@@ -321,6 +321,18 @@ button.hud-pill:active{ transform:scale(.94); }
 .bannerSway{ transform-box:fill-box; transform-origin:center top; animation:bannerSwing 3.5s ease-in-out infinite; }
 @keyframes bannerSwing{ 0%,100%{ transform:rotate(-1.5deg);} 50%{ transform:rotate(1.5deg);} }
 
+/* word joust arena */
+#arenaG .legA, #arenaG .legB{ transform-box:fill-box; transform-origin:center top; }
+.knight.gallop .legA{ animation:kgal .22s ease-in-out infinite; }
+.knight.gallop .legB{ animation:kgal .22s ease-in-out infinite reverse; }
+@keyframes kgal{ 0%,100%{ transform:rotate(24deg);} 50%{ transform:rotate(-24deg);} }
+.knight .kbody{ transform-box:fill-box; transform-origin:center bottom; }
+.knight.gallop .kbody{ animation:kbob .24s ease-in-out infinite; }
+@keyframes kbob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-4px);} }
+#arenaG .spec{ transform-box:fill-box; transform-origin:center bottom; }
+#arenaG.crowd-bounce .spec{ animation:specJump .45s ease-in-out 4; }
+@keyframes specJump{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+
 /* fx particles (driven by CSS vars set inline) */
 .part{ animation:partFly .6s ease-out forwards; }
 @keyframes partFly{ from{ transform:translate(0,0) scale(1); opacity:1; } to{ transform:translate(var(--dx),var(--dy)) scale(var(--s,1.6)); opacity:0; } }
@@ -493,11 +505,13 @@ button.hud-pill:active{ transform:scale(.94); }
       <!-- troops & fx -->
       <g id="troops"></g>
       <!-- bridge parapet lip (in front of troops) -->
-      <path d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
+      <path id="parapetLip" d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
       <g id="fx"></g>
       <!-- pet dragon (above troops so he can swoop over them) -->
       <g id="dragonG" style="display:none"></g>
       <g id="decorFront"></g>
+      <!-- word joust arena (replaces the castle scene during a joust) -->
+      <g id="arenaG" style="display:none"></g>
       <!-- word-builder sign (above foreground decor so it's never hidden) -->
       <g id="wordSignG"></g>
       <g id="bflyLayer"></g>
@@ -571,6 +585,7 @@ button.hud-pill:active{ transform:scale(.94); }
           <button class="opt" data-key="mode" data-val="sounds"><span class="icon">🐶</span><span>First Sounds<span class="opt-sub">Which letter starts the picture?</span></span></button>
           <button class="opt" data-key="mode" data-val="words"><span class="icon">✏️</span><span>Word Builder<span class="opt-sub">Drop letters into slots to spell words</span></span></button>
           <button class="opt" data-key="mode" data-val="numbers"><span class="icon">🔢</span><span>Numbers<span class="opt-sub">Count the pictures, pick the number</span></span></button>
+          <button class="opt" data-key="mode" data-val="joust"><span class="icon">⚔️</span><span>Word Joust<span class="opt-sub">Pick the first letter to win the joust!</span></span></button>
         </div>
       </div>
 
@@ -883,6 +898,12 @@ const CAMPAIGN_DEFAULT = [
   { mode:'sounds', soundsCase:'lower', optionCount:3 },
   { mode:'sounds', soundsCase:'upper', optionCount:4 }
 ];
+/* Word Joust: CVC words (consonant onset + vowel-consonant rime) */
+const JOUST_WORDS = WB_WORDS.filter(w => w[1].length === 3 && !'AEIOU'.includes(w[1][0]));
+/* every word we know with a picture, for "you spelled BAT!" moments */
+const WORD_EMOJI = {};
+WB_WORDS.forEach(([e, w]) => { if(!WORD_EMOJI[w]) WORD_EMOJI[w] = e; });
+Object.values(WORDS).forEach(list => list.forEach(([e, w]) => { const k = w.toUpperCase(); if(!WORD_EMOJI[k]) WORD_EMOJI[k] = e; }));
 const TROOP_COLORS = [['#e2574c','#b13d34'],['#4f9dde','#356fa3'],['#8e6fc1','#67498f'],['#4db36b','#33824a'],['#e6a23c','#b3782a'],['#d96aa7','#a3477b']];
 const PRAISE = ['Great job!','You got it!','Amazing!','Wonderful!','Hooray!','Super!'];
 const GENTLE = ['Almost! Try again!','Keep looking!','You can do it!','Hmm, not that one!'];
@@ -1013,7 +1034,9 @@ const SFX = {
   sad(){ [440, 392, 330, 262].forEach((f, i) => note(f, i * .22, .3, 'triangle', .3)); },
   pop(){ note(620, 0, .07, 'triangle', .35); },
   roar(){ note(110, 0, .3, 'sawtooth', .3); note(82, .12, .35, 'sawtooth', .35); noiseBurst(0, .3, 300, 120, .25, 'lowpass'); },
-  flame(){ noiseBurst(0, .4, 900, 250, .5, 'lowpass'); }
+  flame(){ noiseBurst(0, .4, 900, 250, .5, 'lowpass'); },
+  horn(){ [392, 523, 659].forEach((f, i) => note(f, i * .12, .28, 'sawtooth', .22)); },
+  clang(){ noiseBurst(0, .18, 3000, 900, .45, 'highpass'); note(870, 0, .25, 'square', .18); note(620, .04, .3, 'triangle', .25); }
 };
 function play(name){ if(S.sfx && AC) SFX[name] && SFX[name](); }
 
@@ -1041,7 +1064,8 @@ const Phonics = {
   },
   count(){ return Object.keys(this.manifest).length; },
   keyFor(q){
-    if(S.phonics === false || !q || q.mode === 'numbers') return null;
+    // joust excluded here: playing the onset sound up front would give the answer away
+    if(S.phonics === false || !q || q.mode === 'numbers' || q.mode === 'joust') return null;
     const k = String(q.target || '').toLowerCase();
     return this.manifest[k] ? k : null;
   },
@@ -1485,6 +1509,284 @@ const WordSign = {
     const l = this.layer();
     if(l) l.innerHTML = '';
     this.slots = []; this.idx = 0; this.emojiEl = null;
+  }
+};
+
+/* ================================================================
+   WORD JOUST — tournament arena, two knights, onset vs rime
+   ================================================================ */
+const Arena = {
+  built:false,
+  KY:700, LX:300, RX:1300, MEET:800,
+  HIDES:['#streamG','#roadUnder','#roadTop','#pebbles','#bridgeG','#castleG','#castleDecoG','#bastionG','#cataG','#paddockG','#wordSignG','#parapetLip','#dragonG'],
+  build(){
+    if(this.built) return;
+    this.built = true;
+    const g = $('#arenaG');
+    // banner frame: big word cards on top (_-at), picture shield below
+    el('line', { x1:680, y1:645, x2:680, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, g);
+    el('line', { x1:920, y1:645, x2:920, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, g);
+    el('line', { x1:672, y1:334, x2:928, y2:334, stroke:'#6c4426', 'stroke-width':8, 'stroke-linecap':'round' }, g);
+    const pcols = ['#e2574c','#ffc83d','#4f9dde','#46c07a'];
+    [694, 718, 882, 906].forEach((x, i) => el('path', { d:`M ${x - 8} 338 L ${x + 8} 338 L ${x} 356 Z`, fill:pcols[i % 4], stroke:'#ffffff', 'stroke-width':1.5 }, g));
+    // the word cards live here (rebuilt for every word, widths vary)
+    this.wordG = el('g', {}, g);
+    el('line', { x1:768, y1:414, x2:776, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, g);
+    el('line', { x1:832, y1:414, x2:824, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, g);
+    el('path', { d:'M 752 460 h 96 v 50 q 0 24 -48 42 q -48 -18 -48 -42 Z', fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':4 }, g);
+    this.bannerEmoji = el('text', { x:800, y:520, 'text-anchor':'middle', 'font-size':54 }, g);
+    this.bannerEmoji.textContent = '🐱';
+    // tents and stands
+    this.tent(g, 110, '#4f9dde', '#356fa3');
+    this.tent(g, 1340, '#e2574c', '#b13d34');
+    this.stand(g, 420); this.stand(g, 1020);
+    // knights (left = the child's champion)
+    this.kL = this.buildKnight(g, '#4f9dde', '#356fa3', false);
+    this.kR = this.buildKnight(g, '#e2574c', '#b13d34', true);
+    // tilt rail in front
+    for(let x = 320; x <= 1280; x += 120){ el('rect', { x:x - 5, y:708, width:10, height:34, rx:3, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2 }, g); }
+    el('rect', { x:290, y:702, width:1020, height:13, rx:6, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3 }, g);
+    this.setK(this.kL, this.LX, 0);
+    this.setK(this.kR, this.RX, 0);
+  },
+  tent(g, x, c, dark){
+    el('path', { d:`M ${x} 700 L ${x} 618 L ${x + 150} 618 L ${x + 150} 700 Z`, fill:c, stroke:dark, 'stroke-width':3 }, g);
+    for(let i = 0; i < 3; i++) el('rect', { x:x + 18 + i * 46, y:618, width:18, height:82, fill:'#ffffff', opacity:.65 }, g);
+    el('path', { d:`M ${x - 12} 618 L ${x + 75} 562 L ${x + 162} 618 Z`, fill:dark }, g);
+    el('line', { x1:x + 75, y1:562, x2:x + 75, y2:537, stroke:'#6c4426', 'stroke-width':3.5 }, g);
+    el('path', { class:'flag', d:`M ${x + 75} 539 L ${x + 105} 547 L ${x + 75} 555 Z`, fill:c }, g);
+  },
+  stand(g, x){
+    el('rect', { x:x + 12, y:652, width:10, height:30, fill:'#8d5a33' }, g);
+    el('rect', { x:x + 138, y:652, width:10, height:30, fill:'#8d5a33' }, g);
+    const cols = ['#e6a23c','#8e6fc1','#4db36b','#d96aa7'];
+    for(let i = 0; i < 4; i++){
+      const sx = x + 26 + i * 36;
+      const sp = el('g', { class:'spec' }, g);
+      el('rect', { x:sx - 9, y:616, width:18, height:28, rx:8, fill:cols[i] }, sp);
+      el('circle', { cx:sx, cy:610, r:8.5, fill:'#ffd9b3', stroke:'#deb088', 'stroke-width':2 }, sp);
+    }
+    el('rect', { x, y:642, width:160, height:13, rx:5, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3 }, g);
+  },
+  buildKnight(parent, color, dark, flip){
+    const root = el('g', { class:'knight' }, parent);
+    const inner = el('g', { class:'kbody' }, root);
+    const horse = flip ? '#b59a78' : '#f0ead8';
+    const horseDark = flip ? '#8d7355' : '#c4b694';
+    el('ellipse', { cx:0, cy:3, rx:34, ry:6, fill:'#000', opacity:.13 }, inner);
+    el('rect', { class:'legA', x:-28, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legB', x:-12, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legA', x:8, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legB', x:24, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('path', { d:'M -34 -42 q -16 6 -13 26', stroke:horseDark, 'stroke-width':6, fill:'none', 'stroke-linecap':'round' }, inner);
+    el('ellipse', { cx:0, cy:-36, rx:36, ry:20, fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    // neck + head
+    el('path', { d:'M 26 -44 q 16 -8 22 -28 l 14 7 q -5 24 -22 32 Z', fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    el('ellipse', { cx:58, cy:-68, rx:13, ry:8.5, transform:'rotate(22 58 -68)', fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    el('path', { d:'M 50 -76 l -3 -9 l 8 4 Z', fill:horseDark }, inner);
+    el('circle', { cx:60, cy:-70, r:1.7, fill:'#3e3429' }, inner);
+    // caparison with the letter panel
+    el('rect', { x:-32, y:-52, width:64, height:28, rx:9, fill:color, stroke:dark, 'stroke-width':3 }, inner);
+    el('rect', { x:-24, y:-49, width:48, height:23, rx:6, fill:'#fffbe8', stroke:dark, 'stroke-width':2 }, inner);
+    const txt = el('text', { x:0, y:-31.5, 'text-anchor':'middle', 'font-size':19, 'font-weight':'800', fill:'#27355c' }, inner);
+    txt.textContent = '?';
+    if(flip) txt.setAttribute('transform', 'scale(-1 1)'); // keep letters readable on the mirrored knight
+    // rider
+    el('rect', { x:-16, y:-80, width:25, height:32, rx:11, fill:color, stroke:dark, 'stroke-width':3 }, inner);
+    el('circle', { cx:-3, cy:-88, r:10, fill:'#cfd6e2', stroke:'#9aa3b8', 'stroke-width':2.5 }, inner);
+    el('rect', { x:-13, y:-90, width:20, height:5, rx:2.5, fill:'#9aa3b8' }, inner);
+    el('path', { d:'M -3 -98 q 11 -8 17 -2', stroke:color, 'stroke-width':5, fill:'none', 'stroke-linecap':'round' }, inner);
+    // lance with pennant
+    el('line', { x1:3, y1:-66, x2:88, y2:-54, stroke:'#8d5a33', 'stroke-width':5, 'stroke-linecap':'round' }, inner);
+    el('path', { d:'M 88 -58 L 102 -52 L 86 -48 Z', fill:'#9aa3b8', stroke:'#7b8494', 'stroke-width':2 }, inner);
+    el('path', { class:'flag', d:'M 42 -62 L 64 -58 L 43 -52 Z', fill:color, opacity:.9 }, inner);
+    return { root, inner, txt, flip, x:0, rot:0 };
+  },
+  setK(k, x, rot){
+    k.x = x;
+    if(rot !== undefined) k.rot = rot;
+    k.root.setAttribute('transform', `translate(${x} ${this.KY}) scale(${k.flip ? -1 : 1} 1) rotate(${k.rot || 0})`);
+  },
+  show(){
+    this.build();
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = 'none'; });
+    $('#arenaG').style.display = '';
+  },
+  hide(){
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = ''; });
+    $('#arenaG').style.display = 'none';
+    applyDecor(); // restores the dragon's owned/hidden state
+  },
+  setup(q){
+    this.bannerEmoji.textContent = q.emoji;
+    this.bannerEmoji.removeAttribute('transform');
+    this.buildWordCards(q);
+    this.setK(this.kL, this.LX, 0);
+    this.setK(this.kR, this.RX, 0);
+    this.kL.txt.textContent = '?';
+    this.kR.txt.textContent = q.rime;
+  },
+  /* big readable word display at the top: [ _ ][ at ] */
+  buildWordCards(q){
+    const g = this.wordG;
+    g.innerHTML = '';
+    const oW = 64, rW = 38 * q.rime.length + 26, gap = 10, y = 344, h = 66;
+    const x0 = 800 - (oW + gap + rW) / 2;
+    this.onsetG = el('g', {}, g);
+    this.onsetRect = el('rect', { x:x0, y, width:oW, height:h, rx:12, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':3.5 }, this.onsetG);
+    this.onsetTxt = el('text', { x:x0 + oW / 2, y:y + 47, 'text-anchor':'middle', 'font-size':42, 'font-weight':'800', fill:'#b6bdd1' }, this.onsetG);
+    this.onsetTxt.textContent = '_';
+    this.rimeG = el('g', {}, g);
+    this.rimeRect = el('rect', { x:x0 + oW + gap, y, width:rW, height:h, rx:12, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':3.5 }, this.rimeG);
+    this.rimeTxt = el('text', { x:x0 + oW + gap + rW / 2, y:y + 47, 'text-anchor':'middle', 'font-size':42, 'font-weight':'800', fill:'#27355c' }, this.rimeG);
+    this.rimeTxt.textContent = q.rime;
+    this.onsetTxt.style.fontFamily = 'inherit';
+    this.rimeTxt.style.fontFamily = 'inherit';
+  },
+  /* light a card up while its sound plays */
+  hl(part, on){
+    const G = part === 'onset' ? this.onsetG : this.rimeG;
+    const r = part === 'onset' ? this.onsetRect : this.rimeRect;
+    if(!r) return;
+    r.setAttribute('fill', on ? '#ffe27a' : '#fffbe8');
+    r.setAttribute('stroke', on ? '#ff8a5c' : '#d9c79a');
+    r.setAttribute('stroke-width', on ? 5 : 3.5);
+    if(on){
+      const b = r.getBBox(), cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+      tween(280, t => {
+        const s = 1 + .12 * Math.sin(Math.PI * t);
+        G.setAttribute('transform', `translate(${cx * (1 - s)} ${cy * (1 - s)}) scale(${s})`);
+      }).then(() => G.removeAttribute('transform'));
+    }
+  },
+  async enter(){
+    this.setK(this.kL, this.LX - 340, 0); this.setK(this.kR, this.RX + 340, 0);
+    this.kL.root.classList.add('gallop'); this.kR.root.classList.add('gallop');
+    await tween(850, t => {
+      const k = easeOut(t);
+      this.setK(this.kL, lerp(this.LX - 340, this.LX, k));
+      this.setK(this.kR, lerp(this.RX + 340, this.RX, k));
+    });
+    this.kL.root.classList.remove('gallop'); this.kR.root.classList.remove('gallop');
+  },
+  async armLeft(letter){
+    this.kL.txt.textContent = letter.toLowerCase();
+    this.onsetTxt.textContent = letter.toLowerCase();
+    this.onsetTxt.setAttribute('fill', '#27355c');
+    fxBurst(800 - 60, 377);
+    fxBurst(this.kL.x, this.KY - 40);
+    play('pok');
+    await sleep(380);
+  },
+  /* play one piece of the word: the parent's recording if it exists, else the voice */
+  async playPiece(key){
+    if(S.phonics !== false && Phonics.manifest[key]){
+      if(canSpeak){ try{ speechSynthesis.cancel(); }catch(e){} }
+      await Phonics.play(key);
+    } else {
+      speak(key.length === 1 ? key.toUpperCase() : key);
+      await sleep(800);
+    }
+  },
+  /* the freeze in the middle: sound the onset, then the rime — lighting each card */
+  async soundOut(letter, rime){
+    this.hl('onset', true);
+    await this.playPiece(letter.toLowerCase());
+    this.hl('onset', false);
+    await sleep(260);
+    this.hl('rime', true);
+    await this.playPiece(rime);
+    this.hl('rime', false);
+    await sleep(300);
+  },
+  async knightFall(k){
+    play('bonk');
+    const x0 = k.x;
+    await tween(560, t => { this.setK(k, x0 - (k.flip ? -28 : 28) * t, -85 * easeOut(t)); });
+    fxDust(k.x + (k.flip ? 32 : -32), this.KY - 6);
+    fxBurst(k.x, this.KY - 56);
+  },
+  async standUp(k){
+    await tween(420, t => { this.setK(k, k.x, -85 * (1 - easeOut(t))); });
+  },
+  /* the full joust: charge, freeze + sound out, clash, outcome */
+  async charge(q, pick, correct, spelled){
+    play('horn');
+    const L = this.kL, R = this.kR;
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    fxDust(L.x - 34, this.KY - 4); fxDust(R.x + 34, this.KY - 4);
+    const lNear = this.MEET - 125, rNear = this.MEET + 125;
+    const lx0 = L.x, rx0 = R.x;
+    await tween(1250, t => {
+      const k = easeInOut(t);
+      this.setK(L, lerp(lx0, lNear, k));
+      this.setK(R, lerp(rx0, rNear, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    await this.soundOut(pick, q.rime);
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    await tween(420, t => {
+      const k = easeIn(t);
+      this.setK(L, lerp(lNear, this.MEET - 44, k));
+      this.setK(R, lerp(rNear, this.MEET + 44, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    play('clang');
+    fxBurst(this.MEET, this.KY - 64);
+    svg.classList.add('shake'); setTimeout(() => svg.classList.remove('shake'), 300);
+    // the whole word lights up as it's spoken
+    this.hl('onset', true); this.hl('rime', true);
+    if(correct){
+      speak(`${spelled}! ${pickRand(PRAISE)}`);
+      await this.knightFall(R);
+      this.celebrate();
+      await sleep(600);
+    } else {
+      await this.knightFall(L);
+      // whatever was spelled gets read aloud — silly or not
+      const realEmoji = WORD_EMOJI[spelled.toUpperCase()];
+      if(realEmoji){
+        speak(`${spelled}! You spelled ${spelled}!`);
+        await this.flashEmoji(realEmoji, q.emoji);
+      } else {
+        speak(`${spelled}? ${spelled} is a silly word!`);
+        await sleep(1800);
+      }
+    }
+  },
+  celebrate(){
+    $('#arenaG').classList.add('crowd-bounce');
+    setTimeout(() => $('#arenaG').classList.remove('crowd-bounce'), 1900);
+    const em = this.bannerEmoji;
+    tween(800, t => {
+      const s = 1 + .5 * Math.sin(Math.PI * t);
+      em.setAttribute('transform', `translate(${800 * (1 - s)} ${505 * (1 - s)}) scale(${s})`);
+    }).then(() => em.removeAttribute('transform'));
+  },
+  /* the child spelled a different REAL word: show its picture for a moment */
+  async flashEmoji(e, back){
+    fxPoof(800, 505);
+    this.bannerEmoji.textContent = e;
+    await sleep(2000);
+    fxPoof(800, 505);
+    this.bannerEmoji.textContent = back;
+    await sleep(250);
+  },
+  async recover(){
+    await this.standUp(this.kL);
+    const L = this.kL, R = this.kR;
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    const lx0 = L.x, rx0 = R.x;
+    await tween(750, t => {
+      const k = easeInOut(t);
+      this.setK(L, lerp(lx0, this.LX, k));
+      this.setK(R, lerp(rx0, this.RX, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    this.kL.txt.textContent = '?';
+    this.hl('onset', false); this.hl('rime', false);
+    this.onsetTxt.textContent = '_';
+    this.onsetTxt.setAttribute('fill', '#b6bdd1');
   }
 };
 
@@ -2053,6 +2355,38 @@ function pickWords(n){
   }
   return out;
 }
+/* ---- Word Joust questions ---- */
+function pickJoustWords(n){
+  const out = [], used = new Set();
+  for(let i = 0; i < n; i++){
+    const cands = JOUST_WORDS.filter(w => !used.has(w[1]));
+    const w = weightedPick(cands.length ? cands : JOUST_WORDS, wb => adaptiveWeight(wb[1][0]));
+    used.add(w[1]); out.push(w);
+  }
+  return out;
+}
+function makeJoustQuestion(entry){
+  const emoji = entry[0], word = entry[1];        // e.g. 🐱 CAT
+  const target = word[0];                          // C (the onset)
+  const rime = word.slice(1).toLowerCase();        // at
+  const consonants = ALPHA.filter(L => !'AEIOU'.includes(L) && L !== target);
+  // sneak in a consonant that spells a REAL word with this rime (cat → bat!)
+  const real = shuffle(consonants.filter(c => WORD_EMOJI[c + word.slice(1)]));
+  const n = Math.min(5, Math.max(2, cfg('optionCount')));
+  const dist = [];
+  if(real.length && n > 2) dist.push(real[0]);
+  for(const c of shuffle(consonants)){
+    if(dist.length >= n - 1) break;
+    if(!dist.includes(c)) dist.push(c);
+  }
+  const q = { mode:'joust', target, options:shuffle([target, ...dist]), wrongs:0 };
+  q.word = word; q.emoji = emoji; q.rime = rime;
+  q.answerCase = 'lower';
+  q.bannerText = emoji;
+  q.promptText = `Which letter makes ${emoji}?`;
+  q.speech = `${word.toLowerCase()}! Which letter makes ${word.toLowerCase()}?`;
+  return q;
+}
 
 /* ================================================================
    ANSWER BAR
@@ -2070,7 +2404,7 @@ const Bar = {
       chip.style.lineHeight = '1.2';
     } else {
       chip.textContent = q.bannerText;
-      chip.style.fontSize = (q.mode === 'sounds') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
+      chip.style.fontSize = (q.mode === 'sounds' || q.mode === 'joust') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
       chip.style.lineHeight = '';
     }
     $('#prompt').textContent = q.promptText;
@@ -2145,6 +2479,8 @@ const Game = {
   },
   async runWave(token){
     if(cfg('mode') === 'words') return this.runWordWave(token);
+    if(cfg('mode') === 'joust') return this.runJoustWave(token);
+    Arena.hide();
     this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
     this.waveTotal = S.waveLength;
     const stepCount = this.steps(), startT = this.startT();
@@ -2169,6 +2505,60 @@ const Game = {
       await sleep(250);
     }
     this.waveEnd();
+  },
+  /* Word Joust: arm the left knight with the onset, then joust! */
+  async runJoustWave(token){
+    Arena.show();
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
+    const words = pickJoustWords(S.waveLength);
+    this.waveTotal = words.length;
+    for(let i = 0; i < words.length; i++){
+      if(token !== this.token) return;
+      this.updateHUD(i + 1, words.length);
+      const q = makeJoustQuestion(words[i]);
+      Arena.setup(q);
+      Bar.render(q);
+      await Arena.enter();
+      if(token !== this.token) return;
+      Phonics.say(q);
+      Bar.setEnabled(true);
+      const result = await this.joustBattle(q, token);
+      if(token !== this.token || result === 'aborted') return;
+      recordStat(q.target, q.wrongs);
+      await sleep(350);
+    }
+    this.waveEnd();
+  },
+  joustBattle(q, token){
+    return new Promise(resolve => {
+      Bar.onPick = async (i, btn) => {
+        if(token !== this.token) return resolve('aborted');
+        Bar.setEnabled(false);
+        const pick = q.options[i];
+        const correct = pick === q.target;
+        if(correct) Bar.markGood(btn);
+        else { Bar.markBad(btn); q.wrongs++; }
+        await Arena.armLeft(pick);
+        const spelled = (pick + q.rime).toLowerCase();
+        await Arena.charge(q, pick, correct, spelled);
+        if(token !== this.token) return resolve('aborted');
+        if(correct){
+          const stars = q.wrongs === 0 ? 2 : 1;
+          this.waveHits++; if(q.wrongs === 0) this.waveFirstTry++;
+          this.sessionStars += stars; totalStars += stars; store.set('lc.stars.v1', totalStars);
+          this.updateHUD();
+          fxFloatText(Arena.MEET, Arena.KY - 125, `+${stars} ⭐`);
+          play('yay');
+          await sleep(800);
+          resolve('won');
+        } else {
+          await Arena.recover();
+          if(token !== this.token) return resolve('aborted');
+          speak(pickRand(GENTLE));
+          Bar.setEnabled(true);
+        }
+      };
+    });
   },
   /* Word Builder: each defeated troop drops its letter into the sign */
   async runWordWave(token){
@@ -2278,7 +2668,8 @@ const Game = {
   waveEnd(){
     play('fanfare');
     confettiBlast();
-    let title = 'Castle Defended! 🎉', nextLabel = 'Next Round ▶', nextInfo = '', line = 'Castle defended! Hooray!';
+    const joust = cfg('mode') === 'joust';
+    let title = joust ? 'Tournament Won! 🏆' : 'Castle Defended! 🎉', nextLabel = 'Next Round ▶', nextInfo = '', line = joust ? 'Tournament won! Hooray!' : 'Castle defended! Hooray!';
     if(S.mode === 'campaign'){
       const wasStage = Campaign.data.stage;
       const finished = Campaign.advance();
@@ -2319,6 +2710,7 @@ const Game = {
     $('#troops').innerHTML = '';
     $('#fx').innerHTML = '';
     WordSign.clear();
+    Arena.hide();
     Bar.onPick = null;
   }
 };
@@ -2336,6 +2728,7 @@ const Parade = {
       if(S.mode === 'sounds'){ const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = pickRand(WORDS[L] || [['🐌']])[0]; }
       else if(S.mode === 'words'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(WB_WORDS)[0]; }
       else if(S.mode === 'numbers'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(COUNT_EMOJI)[0]; }
+      else if(S.mode === 'joust'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(JOUST_WORDS)[0]; }
       else if(S.mode === 'teams'){ fakeQ.bannerText = pickRand(S.teams.length ? S.teams : DEFAULTS.teams).toLowerCase(); }
       else { const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = Math.random() < .5 ? L : L.toLowerCase(); }
       const t = new Troop(fakeQ);
@@ -2373,7 +2766,7 @@ const UI = {
   },
   refreshTitle(){
     $('#titleStars').textContent = `⭐ ${totalStars} stars collected`;
-    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder', numbers:'Numbers', campaign:'Campaign' };
+    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder', numbers:'Numbers', joust:'Word Joust', campaign:'Campaign' };
     const diffNames = { easy:'Relaxed', steady:'Steady', brave:'Brave' };
     if(S.mode === 'campaign'){
       Campaign.current();
@@ -2452,9 +2845,9 @@ const Settings = {
       b.classList.toggle('sel', String(T[k]) === v);
     });
     $('#cardCampaign').classList.toggle('hidden', T.mode !== 'campaign');
-    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'campaign');
+    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'campaign' || T.mode === 'joust');
     $('#cardSounds').classList.toggle('hidden', T.mode !== 'sounds');
-    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words' || T.mode === 'numbers');
+    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'joust');
     $('#cardTeams').classList.toggle('hidden', T.mode !== 'teams');
     $('#cardWords').classList.toggle('hidden', T.mode !== 'words');
     $('#cardNumbers').classList.toggle('hidden', T.mode !== 'numbers');
@@ -2469,7 +2862,7 @@ const Settings = {
     if(!Array.isArray(T.campaign) || !T.campaign.length) T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT));
     const box = $('#campList');
     box.innerHTML = '';
-    const modeOpts = [['letters','Letter Match'],['sounds','First Sounds'],['teams','Letter Teams'],['words','Word Builder'],['numbers','Numbers']];
+    const modeOpts = [['letters','Letter Match'],['sounds','First Sounds'],['teams','Letter Teams'],['words','Word Builder'],['numbers','Numbers'],['joust','Word Joust']];
     const styleOpts = {
       letters:[['ul','B → b'],['lu','b → B'],['uu','B → B'],['ll','b → b'],['mixed','Mix 🎲']],
       teams:[['ul','SH → sh'],['lu','sh → SH'],['uu','SH → SH'],['ll','sh → sh'],['mixed','Mix 🎲']],
@@ -2582,7 +2975,7 @@ $('#swPhonics').addEventListener('click', () => { T.phonics = T.phonics === fals
 $('#btnAddStage').addEventListener('click', () => { if(!T) return; T.campaign.push(JSON.parse(JSON.stringify(T.campaign[T.campaign.length - 1] || CAMPAIGN_DEFAULT[0]))); Settings.buildCampaign(); play('pop'); });
 $('#btnResetPlan').addEventListener('click', () => { if(!T) return; T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT)); Settings.buildCampaign(); play('pop'); });
 $('#btnRestartCamp').addEventListener('click', () => { Campaign.reset(); if(T) Settings.buildCampaign(); play('pop'); });
-$('#btnStudio').addEventListener('click', () => { S = T; saveSettings(); location.href = 'record.html'; });
+$('#btnStudio').addEventListener('click', () => { S = T; saveSettings(); location.href = 'record.html?v=' + Date.now(); }); // cache-bust: always the newest Studio
 $('#btnVoiceTest').addEventListener('click', () => {
   const keep = S.voice; S.voice = true;
   speak('Hello! B! Find the uppercase B!');

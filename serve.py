@@ -50,8 +50,10 @@ class Handler(SimpleHTTPRequestHandler):
         return self.rfile.read(n)
 
     def end_headers(self):
-        # recordings change in place: let browsers revalidate them
-        if urlparse(self.path).path.startswith('/sounds/'):
+        # pages, the service worker, and recordings change in place:
+        # make browsers revalidate instead of heuristically caching stale copies
+        p = urlparse(self.path).path
+        if p.startswith('/sounds/') or p.endswith('.html') or p.endswith('sw.js') or p == '/':
             self.send_header('Cache-Control', 'no-cache')
         super().end_headers()
 
