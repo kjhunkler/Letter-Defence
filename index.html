@@ -1108,6 +1108,7 @@ function fitView(){
   if(r < 16 / 9){ W = 1600; H = Math.min(3200, 1600 / r); }
   else { H = 900; W = Math.min(5600, 900 * r); }
   svg.setAttribute('viewBox', `${(1600 - W) / 2} ${900 - H} ${W} ${H}`);
+  if(Arena.built) Arena.fitSign();
 }
 window.addEventListener('resize', fitView);
 if(window.ResizeObserver) new ResizeObserver(fitView).observe(wrap);
@@ -1523,18 +1524,20 @@ const Arena = {
     if(this.built) return;
     this.built = true;
     const g = $('#arenaG');
-    // banner frame: big word cards on top (_-at), picture shield below
-    el('line', { x1:680, y1:645, x2:680, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, g);
-    el('line', { x1:920, y1:645, x2:920, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, g);
-    el('line', { x1:672, y1:334, x2:928, y2:334, stroke:'#6c4426', 'stroke-width':8, 'stroke-linecap':'round' }, g);
+    // banner frame: big word cards on top (_-at), picture shield below.
+    // the whole sign lives in signG so it can scale up on small screens
+    const sg = this.signG = el('g', {}, g);
+    el('line', { x1:680, y1:645, x2:680, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, sg);
+    el('line', { x1:920, y1:645, x2:920, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, sg);
+    el('line', { x1:672, y1:334, x2:928, y2:334, stroke:'#6c4426', 'stroke-width':8, 'stroke-linecap':'round' }, sg);
     const pcols = ['#e2574c','#ffc83d','#4f9dde','#46c07a'];
-    [694, 718, 882, 906].forEach((x, i) => el('path', { d:`M ${x - 8} 338 L ${x + 8} 338 L ${x} 356 Z`, fill:pcols[i % 4], stroke:'#ffffff', 'stroke-width':1.5 }, g));
+    [694, 718, 882, 906].forEach((x, i) => el('path', { d:`M ${x - 8} 338 L ${x + 8} 338 L ${x} 356 Z`, fill:pcols[i % 4], stroke:'#ffffff', 'stroke-width':1.5 }, sg));
     // the word cards live here (rebuilt for every word, widths vary)
-    this.wordG = el('g', {}, g);
-    el('line', { x1:768, y1:414, x2:776, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, g);
-    el('line', { x1:832, y1:414, x2:824, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, g);
-    el('path', { d:'M 752 460 h 96 v 50 q 0 24 -48 42 q -48 -18 -48 -42 Z', fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':4 }, g);
-    this.bannerEmoji = el('text', { x:800, y:520, 'text-anchor':'middle', 'font-size':54 }, g);
+    this.wordG = el('g', {}, sg);
+    el('line', { x1:768, y1:414, x2:776, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, sg);
+    el('line', { x1:832, y1:414, x2:824, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, sg);
+    el('path', { d:'M 752 460 h 96 v 50 q 0 24 -48 42 q -48 -18 -48 -42 Z', fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':4 }, sg);
+    this.bannerEmoji = el('text', { x:800, y:520, 'text-anchor':'middle', 'font-size':54 }, sg);
     this.bannerEmoji.textContent = '🐱';
     // tents and stands
     this.tent(g, 110, '#4f9dde', '#356fa3');
@@ -1611,6 +1614,25 @@ const Arena = {
     this.build();
     this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = 'none'; });
     $('#arenaG').style.display = '';
+    this.fitSign();
+  },
+  /* keep the sign readable on small screens: grow it (anchored at the post
+     bases, up into the sky) until the word letters are ~26 screen px */
+  signScale:1,
+  fitSign(){
+    if(!this.built) return;
+    const vb = svg.viewBox.baseVal;
+    const pxPerUnit = (wrap.clientWidth || 1) / (vb.width || 1600);
+    let s = 26 / (42 * pxPerUnit);
+    const maxByTop = (645 - vb.y - 16) / 311; // never grow past the visible sky
+    s = Math.max(1, Math.min(s, 2.6, maxByTop));
+    this.signScale = s;
+    this.signG.setAttribute('transform', `translate(${800 * (1 - s)} ${645 * (1 - s)}) scale(${s})`);
+  },
+  /* sign-local coords → world coords (for particle effects) */
+  signPoint(x, y){
+    const s = this.signScale || 1;
+    return { x: 800 + (x - 800) * s, y: 645 + (y - 645) * s };
   },
   hide(){
     this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = ''; });
@@ -1673,7 +1695,8 @@ const Arena = {
     this.kL.txt.textContent = letter.toLowerCase();
     this.onsetTxt.textContent = letter.toLowerCase();
     this.onsetTxt.setAttribute('fill', '#27355c');
-    fxBurst(800 - 60, 377);
+    const p = this.signPoint(800 - 60, 377);
+    fxBurst(p.x, p.y);
     fxBurst(this.kL.x, this.KY - 40);
     play('pok');
     await sleep(380);
@@ -1765,10 +1788,11 @@ const Arena = {
   },
   /* the child spelled a different REAL word: show its picture for a moment */
   async flashEmoji(e, back){
-    fxPoof(800, 505);
+    const p = this.signPoint(800, 505);
+    fxPoof(p.x, p.y);
     this.bannerEmoji.textContent = e;
     await sleep(2000);
-    fxPoof(800, 505);
+    fxPoof(p.x, p.y);
     this.bannerEmoji.textContent = back;
     await sleep(250);
   },
