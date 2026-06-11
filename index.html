@@ -37,6 +37,7 @@ body{
   touch-action:manipulation;
 }
 button{ font-family:inherit; color:inherit; border:none; background:none; cursor:pointer; touch-action:manipulation; }
+.hidden{ display:none !important; }
 
 /* ============================= LAYOUT ============================= */
 #app{ display:flex; flex-direction:column; height:100vh; height:100dvh; }
@@ -451,6 +452,8 @@ button.hud-pill:active{ transform:scale(.94); }
       <path d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
       <g id="fx"></g>
       <g id="decorFront"></g>
+      <!-- word-builder sign (above foreground decor so it's never hidden) -->
+      <g id="wordSignG"></g>
       <g id="bflyLayer"></g>
 
       <!-- invisible walking guide -->
@@ -517,6 +520,7 @@ button.hud-pill:active{ transform:scale(.94); }
           <button class="opt" data-key="mode" data-val="letters"><span class="icon">🅰️</span><span>Letter Match<span class="opt-sub">Match big and small letters</span></span></button>
           <button class="opt" data-key="mode" data-val="teams"><span class="icon">🔠</span><span>Letter Teams<span class="opt-sub">Two-letter pairs like sh, ch, th</span></span></button>
           <button class="opt" data-key="mode" data-val="sounds"><span class="icon">🐶</span><span>First Sounds<span class="opt-sub">Which letter starts the picture?</span></span></button>
+          <button class="opt" data-key="mode" data-val="words"><span class="icon">✏️</span><span>Word Builder<span class="opt-sub">Drop letters into slots to spell words</span></span></button>
         </div>
       </div>
 
@@ -554,6 +558,16 @@ button.hud-pill:active{ transform:scale(.94); }
         </div>
         <div class="chip-grid" id="teamGrid"></div>
         <div class="hint">Digraphs make one sound (sh, ch). Blends mix two (st, br). Pick at least 2.</div>
+      </div>
+
+      <div class="set-card hidden" id="cardWords">
+        <h3>Words to Build</h3>
+        <div class="seg" id="segWordLen">
+          <button data-key="wordLen" data-val="3">Short (3)</button>
+          <button data-key="wordLen" data-val="4">Longer (4)</button>
+          <button data-key="wordLen" data-val="both">Both</button>
+        </div>
+        <div class="hint">Each defeated troop drops its letter into the word sign — c‑a‑t spells cat! A round builds a few words, following the Round Length setting.</div>
       </div>
 
       <div class="set-card">
@@ -606,6 +620,7 @@ button.hud-pill:active{ transform:scale(.94); }
         <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Tricky letters so far:</div>
         <div class="tricky-list" id="trickyList"><span class="none">Play a round to see which letters need practice.</span></div>
         <div id="statTotals"></div>
+        <div class="hint">Tricky letters quietly march in a little more often, so they get extra practice without anyone noticing.</div>
         <br>
         <button class="soft-btn" id="btnResetStats">🧹 Reset progress &amp; stars</button>
       </div>
@@ -673,14 +688,20 @@ function el(tag, attrs, parent){
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function tween(dur, fn){
+  // rAF for smoothness, with a timeout backstop so a throttled/hidden
+  // tab can never freeze the game loop mid-animation
   return new Promise(res => {
     const t0 = performance.now();
-    function step(now){
-      const t = Math.min(1, (now - t0) / dur);
+    let raf = 0, timer = 0;
+    function step(){
+      raf = 0; clearTimeout(timer);
+      const t = Math.min(1, (performance.now() - t0) / dur);
       fn(t);
-      if(t < 1) requestAnimationFrame(step); else res();
+      if(t >= 1){ res(); return; }
+      raf = requestAnimationFrame(step);
+      timer = setTimeout(() => { cancelAnimationFrame(raf); step(); }, 150);
     }
-    requestAnimationFrame(step);
+    step();
   });
 }
 const easeOut  = t => 1 - Math.pow(1 - t, 3);
@@ -729,6 +750,20 @@ const WORDS = {
 };
 const TREATS = ['🐑','🐐','🍞','🍚'];
 const TREAT_NAMES = {'🐑':'sheep','🐐':'goat','🍞':'bread','🍚':'rice'};
+/* Word Builder: emoji + word pairs (3- and 4-letter, picture-friendly) */
+const WB_WORDS = [
+  ['🐱','CAT'],['🐶','DOG'],['☀️','SUN'],['🐝','BEE'],['🐷','PIG'],['🐮','COW'],
+  ['🦉','OWL'],['🦊','FOX'],['🚌','BUS'],['🚗','CAR'],['🥚','EGG'],['🎩','HAT'],
+  ['🔑','KEY'],['🐜','ANT'],['🛏️','BED'],['🥤','CUP'],['🥧','PIE'],['🥜','NUT'],
+  ['🐛','BUG'],['🐔','HEN'],['📦','BOX'],['💎','GEM'],['🧊','ICE'],['🗺️','MAP'],
+  ['🖊️','PEN'],['🕸️','WEB'],['🦇','BAT'],['🐀','RAT'],['🚐','VAN'],['🪵','LOG'],
+  ['🪚','SAW'],['🪓','AXE'],['🦵','LEG'],['👂','EAR'],
+  ['🐸','FROG'],['🐟','FISH'],['🐦','BIRD'],['🦆','DUCK'],['🎂','CAKE'],['⭐','STAR'],
+  ['🌙','MOON'],['🌳','TREE'],['🚢','SHIP'],['🪁','KITE'],['🦁','LION'],['🐻','BEAR'],
+  ['🌽','CORN'],['🥛','MILK'],['🧦','SOCK'],['💍','RING'],['🥁','DRUM'],['🦀','CRAB'],
+  ['🔔','BELL'],['📖','BOOK'],['👢','BOOT'],['🐐','GOAT'],['🚪','DOOR'],['🤴','KING'],
+  ['🌹','ROSE'],['🪱','WORM']
+];
 const TROOP_COLORS = [['#e2574c','#b13d34'],['#4f9dde','#356fa3'],['#8e6fc1','#67498f'],['#4db36b','#33824a'],['#e6a23c','#b3782a'],['#d96aa7','#a3477b']];
 const PRAISE = ['Great job!','You got it!','Amazing!','Wonderful!','Hooray!','Super!'];
 const GENTLE = ['Almost! Try again!','Keep looking!','You can do it!','Hmm, not that one!'];
@@ -743,6 +778,7 @@ const DEFAULTS = {
   letters: ALPHA.slice(),
   teams: ['SH','CH','TH','WH','QU'],
   optionCount:3, difficulty:'easy', waveLength:8, pantrySize:5,
+  wordLen:'3',
   sfx:true, voice:true
 };
 let S = Object.assign({}, DEFAULTS, store.get('lc.settings.v1', {}));
@@ -1151,6 +1187,94 @@ const Paddock = {
 };
 
 /* ================================================================
+   WORD SIGN (Word Builder mode: defeated letters drop into slots)
+   ================================================================ */
+const WordSign = {
+  X:600, TOP:775, idx:0, slots:[], word:'', emojiEl:null,
+  layer(){ return $('#wordSignG'); },
+  build(emoji, word){
+    this.clear();
+    this.word = word; this.idx = 0;
+    const n = word.length, slotW = 40, gap = 8;
+    const innerW = 64 + n * (slotW + gap) + 8;
+    const x0 = this.X - innerW / 2;
+    const g = el('g', {}, this.layer());
+    el('rect', { x:x0 + 12, y:this.TOP + 22, width:9, height:72, rx:4, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2.5 }, g);
+    el('rect', { x:x0 + innerW - 21, y:this.TOP + 22, width:9, height:72, rx:4, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2.5 }, g);
+    el('rect', { x:x0, y:this.TOP, width:innerW, height:58, rx:12, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3.5 }, g);
+    const em = el('text', { x:x0 + 34, y:this.TOP + 41, 'text-anchor':'middle', 'font-size':34 }, g);
+    em.textContent = emoji;
+    this.emojiEl = em;
+    for(let i = 0; i < n; i++){
+      const sx = x0 + 60 + i * (slotW + gap);
+      const r = el('rect', { x:sx, y:this.TOP + 9, width:slotW, height:40, rx:8, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':2.5 }, g);
+      const t = el('text', { x:sx + slotW / 2, y:this.TOP + 40, 'text-anchor':'middle', 'font-size':28, fill:'#e3d7b8', 'font-weight':'800' }, g);
+      t.textContent = word[i].toLowerCase();
+      t.style.fontFamily = 'inherit';
+      this.slots.push({ rect:r, text:t, cx:sx + slotW / 2, cy:this.TOP + 29 });
+    }
+    this.mark();
+    // pop in
+    const cx = this.X, cy = this.TOP + 40;
+    return tween(300, t => {
+      const s = easeOut(t);
+      g.setAttribute('transform', `translate(${cx * (1 - s)} ${cy * (1 - s)}) scale(${s})`);
+    }).then(() => g.removeAttribute('transform'));
+  },
+  mark(){
+    this.slots.forEach((s, i) => {
+      s.rect.setAttribute('stroke', i === this.idx ? '#ff8a5c' : '#d9c79a');
+      s.rect.setAttribute('stroke-width', i === this.idx ? 4.5 : 2.5);
+    });
+  },
+  /* the defeated troop's letter arcs from (x,y) into the next slot */
+  async dropFrom(x, y){
+    const s = this.slots[this.idx];
+    if(!s) return;
+    const fly = el('text', { 'text-anchor':'middle', 'font-size':36, fill:'#27355c', 'font-weight':'800', stroke:'#ffffff', 'stroke-width':5, 'paint-order':'stroke' }, this.layer());
+    fly.textContent = this.word[this.idx].toLowerCase();
+    fly.style.fontFamily = 'inherit';
+    await tween(700, t => {
+      const k = easeInOut(t);
+      const fx2 = lerp(x, s.cx, k);
+      const fy = lerp(y, s.cy + 11, k) - 130 * 4 * t * (1 - t) * .5;
+      fly.setAttribute('transform', `translate(${fx2} ${fy}) rotate(${(1 - t) * -24}) scale(${1 - .15 * t})`);
+    });
+    fly.remove();
+    s.text.setAttribute('fill', '#27355c');
+    fxFloatText(s.cx, s.cy - 18, '✦', '#ffc83d');
+    play('pok');
+    this.idx++;
+    this.mark();
+  },
+  /* whole word done: bounce, sparkle, bonus star */
+  async celebrate(){
+    play('yay');
+    speak(`${this.word.split('').join(', ')}. ${this.word.toLowerCase()}! ${pickRand(PRAISE)}`);
+    fxBurst(this.X, this.TOP + 6);
+    Game.sessionStars++; totalStars++; store.set('lc.stars.v1', totalStars);
+    Game.waveBonus = (Game.waveBonus || 0) + 1;
+    Game.updateHUD();
+    fxFloatText(this.X, this.TOP - 12, '+1 ⭐');
+    const em = this.emojiEl;
+    if(em){
+      const ex = +em.getAttribute('x'), ey = +em.getAttribute('y') - 12;
+      await tween(900, t => {
+        const s = 1 + .9 * Math.sin(Math.PI * t);
+        em.setAttribute('transform', `translate(${ex * (1 - s)} ${ey * (1 - s)}) scale(${s})`);
+      });
+      em.removeAttribute('transform');
+    }
+    await sleep(350);
+  },
+  clear(){
+    const l = this.layer();
+    if(l) l.innerHTML = '';
+    this.slots = []; this.idx = 0; this.emojiEl = null;
+  }
+};
+
+/* ================================================================
    CATAPULT
    ================================================================ */
 const Catapult = {
@@ -1398,13 +1522,28 @@ function pickDistractors(pool, full, target, n, preferSimilar, mode){
   }
   return out;
 }
+/* ---- adaptive targeting: tricky symbols quietly appear more often ---- */
+function adaptiveWeight(sym){
+  const st = STATS[sym];
+  if(!st || !st.att) return 1.6;            // brand new: worth exploring
+  const miss = st.wrong / (st.wrong + st.att);
+  if(miss === 0 && st.att >= 3) return .6;  // mastered: rests a little
+  return 1 + 3.5 * miss;                    // tricky: shows up more
+}
+function weightedPick(items, weightFn){
+  let total = 0;
+  const ws = items.map(it => { const w = Math.max(.05, weightFn(it)); total += w; return w; });
+  let r = Math.random() * total;
+  for(let i = 0; i < items.length; i++){ r -= ws[i]; if(r <= 0) return items[i]; }
+  return items[items.length - 1];
+}
 function makeQuestion(){
   const mode = S.mode;
   let pool, full;
   if(mode === 'teams'){ pool = S.teams.length >= 2 ? S.teams : DEFAULTS.teams; full = TEAMS_ALL; }
   else { pool = S.letters.length >= 2 ? S.letters : ALPHA; full = ALPHA; }
-  let target = pickRand(pool);
-  if(pool.length > 1){ let guard = 0; while(target === lastTarget && guard++ < 8) target = pickRand(pool); }
+  let target = weightedPick(pool, adaptiveWeight);
+  if(pool.length > 1){ let guard = 0; while(target === lastTarget && guard++ < 8) target = weightedPick(pool, adaptiveWeight); }
   lastTarget = target;
   const distractors = pickDistractors(pool, full, target, S.optionCount - 1, S.difficulty === 'brave', mode);
   const options = shuffle([target, ...distractors]);
@@ -1439,6 +1578,34 @@ function makeQuestion(){
 function optionLabel(q, opt){
   if(q.answerCase === 'both') return opt.toUpperCase() + opt.toLowerCase();
   return caseStr(opt, q.answerCase);
+}
+/* ---- Word Builder questions ---- */
+function makeWordQuestion(emoji, word, li){
+  const target = word[li];
+  // distractors never come from the word itself, so spelling ahead can't mislead
+  const safe = ALPHA.filter(L => L === target || !word.includes(L));
+  const distractors = pickDistractors(safe, safe, target, S.optionCount - 1, S.difficulty === 'brave', 'letters');
+  const q = { mode:'words', target, options:shuffle([target, ...distractors]), wrongs:0 };
+  q.answerCase = 'lower';
+  q.bannerText = target.toLowerCase();
+  q.emoji = emoji; q.word = word;
+  q.promptText = `Build the word: ${word.toLowerCase()}!`;
+  q.speech = li === 0
+    ? `${word.toLowerCase()}! Let's build ${word.toLowerCase()}! Find the ${target}!`
+    : `Find the ${target}!`;
+  return q;
+}
+function pickWords(n){
+  let list = WB_WORDS.filter(w => S.wordLen === 'both' || w[1].length === +S.wordLen);
+  if(list.length < n) list = WB_WORDS.slice();
+  const out = [], used = new Set();
+  for(let i = 0; i < n; i++){
+    const cands = list.filter(w => !used.has(w[1]));
+    const w = weightedPick(cands.length ? cands : list,
+      wb => wb[1].split('').reduce((s, L) => s + adaptiveWeight(L), 0) / wb[1].length);
+    used.add(w[1]); out.push(w);
+  }
+  return out;
 }
 
 /* ================================================================
@@ -1489,9 +1656,10 @@ const Game = {
     if(S.difficulty === 'steady') return Math.max(2, n - 1);
     return Math.max(1, n - 2);
   },
-  updateHUD(){
+  updateHUD(cur, total){
+    if(cur !== undefined){ this._hudCur = cur; this._hudTotal = total; }
     $('#hudStars').textContent = this.sessionStars;
-    $('#hudWave').textContent = `${Math.min(this.troopIdx + 1, S.waveLength)}/${S.waveLength}`;
+    $('#hudWave').textContent = `${this._hudCur || 1}/${this._hudTotal || S.waveLength}`;
   },
   async start(fresh){
     this.token++;
@@ -1503,12 +1671,14 @@ const Game = {
     this.runWave(this.token);
   },
   async runWave(token){
-    this.waveHits = 0; this.waveFirstTry = 0;
+    if(S.mode === 'words') return this.runWordWave(token);
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0;
+    this.waveTotal = S.waveLength;
     const stepCount = this.steps(), startT = this.startT();
     const stepLen = (1 - startT) / stepCount;
     for(this.troopIdx = 0; this.troopIdx < S.waveLength; this.troopIdx++){
       if(token !== this.token) return;
-      this.updateHUD();
+      this.updateHUD(Math.min(this.troopIdx + 1, S.waveLength), S.waveLength);
       const q = makeQuestion();
       const troop = new Troop(q);
       Bar.render(q);
@@ -1524,6 +1694,46 @@ const Game = {
         return this.gameOver();
       }
       await sleep(250);
+    }
+    this.waveEnd();
+  },
+  /* Word Builder: each defeated troop drops its letter into the sign */
+  async runWordWave(token){
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0;
+    const words = pickWords(Math.max(2, Math.round(S.waveLength / 3)));
+    const total = words.reduce((s, w) => s + w[1].length, 0);
+    this.waveTotal = total;
+    const stepCount = this.steps(), startT = this.startT();
+    const stepLen = (1 - startT) / stepCount;
+    let num = 0;
+    for(const [emoji, word] of words){
+      if(token !== this.token) return;
+      await WordSign.build(emoji, word);
+      for(let li = 0; li < word.length; ){
+        if(token !== this.token) return;
+        this.updateHUD(Math.min(num + 1, total), total);
+        const q = makeWordQuestion(emoji, word, li);
+        q.onKo = hp => WordSign.dropFrom(hp.x, hp.y);
+        const troop = new Troop(q);
+        Bar.render(q);
+        await troop.enter(startT, 1100);
+        if(token !== this.token){ troop.g.remove(); return; }
+        speak(q.speech);
+        Bar.setEnabled(true);
+        const result = await this.battle(q, troop, stepLen, token);
+        if(token !== this.token) return;
+        recordStat(q.target, q.wrongs);
+        if(result === 'defeated'){ li++; num++; }
+        else if(result === 'breached'){
+          if(Paddock.count() === 0){ await sleep(400); return this.gameOver(); }
+          // the letter got away — another troop brings the same letter
+        } else { return; }
+        await sleep(250);
+      }
+      await WordSign.celebrate();
+      if(token !== this.token) return;
+      WordSign.clear();
+      await sleep(300);
     }
     this.waveEnd();
   },
@@ -1546,9 +1756,11 @@ const Game = {
           fxFloatText(hp.x, hp.y - 50, `+${stars} ⭐`);
           play('yay');
           if(q.mode === 'sounds') speak(`${q.target}! ${q.word} starts with ${q.target}! ${pickRand(PRAISE)}`);
+          else if(q.mode === 'words') speak(`${q.target}! ${pickRand(PRAISE)}`);
           else speak(pickRand(PRAISE));
+          const dropP = q.onKo ? q.onKo(hp) : Promise.resolve();
           await troop.ko();
-          await Catapult.reload();
+          await Promise.all([Catapult.reload(), dropP]);
           resolve('defeated');
         } else {
           Bar.markBad(btn);
@@ -1584,12 +1796,13 @@ const Game = {
     play('fanfare');
     speak('Castle defended! Hooray!');
     confettiBlast();
-    const acc = this.waveFirstTry / Math.max(1, S.waveLength);
+    const total = this.waveTotal || S.waveLength;
+    const acc = this.waveFirstTry / Math.max(1, total);
     const nStars = acc >= .85 ? 3 : acc >= .55 ? 2 : 1;
     const spans = $('#rateStars').querySelectorAll('span');
     spans.forEach(s => s.classList.remove('on'));
-    $('#waveStat1').textContent = `You earned ${this.waveHits + this.waveFirstTry} ⭐ this round!`;
-    $('#waveStat2').textContent = `${this.waveFirstTry} of ${S.waveLength} on the very first try!`;
+    $('#waveStat1').textContent = `You earned ${this.waveHits + this.waveFirstTry + (this.waveBonus || 0)} ⭐ this round!`;
+    $('#waveStat2').textContent = `${this.waveFirstTry} of ${total} on the very first try!`;
     UI.show('wave');
     spans.forEach((s, i) => { if(i < nStars) setTimeout(() => s.classList.add('on'), 350 + i * 380); });
   },
@@ -1603,6 +1816,7 @@ const Game = {
     this.token++;
     $('#troops').innerHTML = '';
     $('#fx').innerHTML = '';
+    WordSign.clear();
     Bar.onPick = null;
   }
 };
@@ -1618,6 +1832,7 @@ const Parade = {
       if(!this.on) return;
       const fakeQ = { mode:S.mode === 'sounds' ? 'sounds' : S.mode, bannerText:'', target:'A' };
       if(S.mode === 'sounds'){ const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = pickRand(WORDS[L] || [['🐌']])[0]; }
+      else if(S.mode === 'words'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(WB_WORDS)[0]; }
       else if(S.mode === 'teams'){ fakeQ.bannerText = pickRand(S.teams.length ? S.teams : DEFAULTS.teams).toLowerCase(); }
       else { const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = Math.random() < .5 ? L : L.toLowerCase(); }
       const t = new Troop(fakeQ);
@@ -1654,7 +1869,7 @@ const UI = {
   },
   refreshTitle(){
     $('#titleStars').textContent = `⭐ ${totalStars} stars collected`;
-    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds' };
+    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder' };
     const diffNames = { easy:'Relaxed', steady:'Steady', brave:'Brave' };
     $('#modePill').textContent = `${modeNames[S.mode]} • ${S.optionCount} choices • ${diffNames[S.difficulty]}`;
   }
@@ -1725,9 +1940,10 @@ const Settings = {
       const k = b.dataset.key, v = b.dataset.val;
       b.classList.toggle('sel', String(T[k]) === v);
     });
-    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds');
-    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams');
+    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words');
+    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words');
     $('#cardTeams').classList.toggle('hidden', T.mode !== 'teams');
+    $('#cardWords').classList.toggle('hidden', T.mode !== 'words');
     document.querySelectorAll('#letterGrid .lchip').forEach(b => b.classList.toggle('sel', T.letters.includes(b.dataset.letter)));
     document.querySelectorAll('#teamGrid .lchip').forEach(b => b.classList.toggle('sel', T.teams.includes(b.dataset.team)));
     $('#swSfx').classList.toggle('on', T.sfx);
