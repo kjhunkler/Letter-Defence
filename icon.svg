@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#8fcdf7"/>
+  <circle cx="116" cy="112" r="46" fill="#ffd95e" stroke="#ffc83d" stroke-width="8"/>
+  <ellipse cx="392" cy="120" rx="58" ry="22" fill="#ffffff" opacity=".9"/>
+  <path d="M0 408 Q128 366 256 396 T512 400 L512 512 L0 512 Z" fill="#7fc25b"/>
+  <!-- side towers -->
+  <rect x="96" y="216" width="76" height="196" fill="#dfe3ec" stroke="#9aa3b8" stroke-width="8"/>
+  <polygon points="84,216 134,150 184,216" fill="#d2625b" stroke="#b14e48" stroke-width="8"/>
+  <rect x="340" y="216" width="76" height="196" fill="#dfe3ec" stroke="#9aa3b8" stroke-width="8"/>
+  <polygon points="328,216 378,150 428,216" fill="#d2625b" stroke="#b14e48" stroke-width="8"/>
+  <line x1="378" y1="152" x2="378" y2="106" stroke="#7b8494" stroke-width="8"/>
+  <path d="M378 108 L426 119 L378 130 Z" fill="#ff8a5c"/>
+  <!-- keep -->
+  <rect x="166" y="252" width="180" height="160" fill="#eceef4" stroke="#9aa3b8" stroke-width="8"/>
+  <g fill="#eceef4" stroke="#9aa3b8" stroke-width="7">
+    <rect x="170" y="226" width="30" height="28"/>
+    <rect x="218" y="226" width="30" height="28"/>
+    <rect x="266" y="226" width="30" height="28"/>
+    <rect x="314" y="226" width="28" height="28"/>
+  </g>
+  <path d="M222 412 L222 332 Q256 296 290 332 L290 412 Z" fill="#9a6b3f" stroke="#7c5430" stroke-width="8"/>
+  <rect x="124" y="262" width="22" height="34" rx="10" fill="#5d6884"/>
+  <rect x="368" y="262" width="22" height="34" rx="10" fill="#5d6884"/>
+  <!-- big letter banner -->
+  <rect x="186" y="92" width="120" height="104" rx="20" fill="#fffbe8" stroke="#d9c79a" stroke-width="9"/>
+  <text x="246" y="172" text-anchor="middle" font-family="Comic Sans MS, ui-rounded, sans-serif" font-size="78" font-weight="800" fill="#27355c">Bb</text>
+</svg>
