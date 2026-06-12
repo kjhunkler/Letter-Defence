@@ -319,8 +319,9 @@ button.hud-pill:active{ transform:scale(.94); }
 .kc-i{ font-size:20px; line-height:1.1; }
 .kc-l{ font-size:9.5px; font-weight:800; color:#7c87a6; }
 
-/* wandering pets */
+/* wandering pets & grove toys */
 .gpet{ cursor:pointer; }
+.apple{ cursor:pointer; }
 .gpet .gpet-inner{ transform-box:fill-box; transform-origin:center bottom; }
 .gpet.walking .gpet-inner{ animation:petHop .3s ease-in-out infinite; }
 @keyframes petHop{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
@@ -530,6 +531,8 @@ button.hud-pill:active{ transform:scale(.94); }
       <g id="decorFront"></g>
       <!-- word joust arena (replaces the castle scene during a joust) -->
       <g id="arenaG" style="display:none"></g>
+      <!-- pet grove (a cozy place to play with the pets) -->
+      <g id="groveG" style="display:none"></g>
       <!-- word-builder sign (above foreground decor so it's never hidden) -->
       <g id="wordSignG"></g>
       <!-- adopted pets wandering the meadow -->
@@ -574,6 +577,7 @@ button.hud-pill:active{ transform:scale(.94); }
       <div style="margin-top:6px;">
         <button class="soft-btn" id="btnShop">⭐ Star Shop</button>
         <button class="soft-btn" id="btnPets">🐾 Pets</button>
+        <button class="soft-btn" id="btnGrove">🌳 Grove</button>
       </div>
       <div id="modePill">Letter Match • 3 choices • Steady</div>
     </div>
@@ -983,7 +987,11 @@ const SHOP_ITEMS = [
   { id:'flags',   icon:'🌈', name:'Rainbow Flags', desc:'Bright new flags for every tower', cost:12 },
   { id:'garden',  icon:'🌻', name:'Castle Garden', desc:'Sunflowers and blossoms along the wall', cost:18 },
   { id:'banners', icon:'👑', name:'Royal Banners', desc:'Grand star banners on the gatehouse', cost:25 },
-  { id:'dragon',  icon:'🐲', name:'Pet Dragon', desc:'Guards the gate! Each dragon you own scares one troop away per round — adopt more in 🐾 Pets', cost:40 }
+  { id:'dragon',  icon:'🐲', name:'Pet Dragon', desc:'Guards the gate! Each dragon you own scares one troop away per round — adopt more in 🐾 Pets', cost:40 },
+  { id:'ball',    icon:'⚽', name:'Bouncy Ball', desc:'For the Pet Grove — push it and a pet gives chase!', cost:10, grove:true },
+  { id:'slide',   icon:'🛝', name:'Grove Slide', desc:'For the Pet Grove — tap it and a pet rides down. Wheee!', cost:20, grove:true },
+  { id:'pond',    icon:'🪷', name:'Splash Pond', desc:'For the Pet Grove — tap the water to see the fish jump', cost:25, grove:true },
+  { id:'playcastle', icon:'🏰', name:'Play Castle', desc:'For the Pet Grove — tap it… who is hiding inside?', cost:35, grove:true }
 ];
 let SHOP = store.get('lc.shop.v1', { owned:[], shown:{} });
 if(!Array.isArray(SHOP.owned)) SHOP.owned = [];
@@ -1094,10 +1102,21 @@ function play(name){ if(S.sfx && AC) SFX[name] && SFX[name](); }
 
 /* ---------------- speech ---------------- */
 const canSpeak = 'speechSynthesis' in window;
+/* some browsers swallow speech until it's first triggered by a real tap */
+function ttsWarmup(){
+  if(!canSpeak) return;
+  try{
+    speechSynthesis.resume();
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
 function speak(text){
   if(!S.voice || !canSpeak || !text) return;
   try{
     speechSynthesis.cancel();
+    speechSynthesis.resume();
     const u = new SpeechSynthesisUtterance(text);
     u.rate = .92; u.pitch = 1.1; u.lang = 'en-US';
     speechSynthesis.speak(u);
@@ -1146,6 +1165,18 @@ const Phonics = {
   },
   say(q){ return this.sayWith(q, q.speech); }
 };
+/* every tapped letter: say its NAME first, then the SOUND it makes (parent
+   recording when available) — right or wrong, in every mode */
+async function announceLetter(sym){
+  const name = sym.length === 1 ? sym.toUpperCase() : spellOut(sym);
+  speak(name);
+  const key = String(sym).toLowerCase();
+  if(S.phonics !== false && Phonics.manifest[key]){
+    await sleep(700);
+    if(canSpeak){ try{ speechSynthesis.cancel(); }catch(e){} }
+    await Phonics.play(key);
+  }
+}
 
 /* ================================================================
    SCENE — generated terrain, decorations, responsive viewBox
@@ -1159,7 +1190,10 @@ function fitView(){
   let W = 1600, H = 900;
   if(r < 16 / 9){ W = 1600; H = Math.min(3200, 1600 / r); }
   else { H = 900; W = Math.min(5600, 900 * r); }
-  svg.setAttribute('viewBox', `${(1600 - W) / 2} ${900 - H} ${W} ${H}`);
+  let minX = (1600 - W) / 2;
+  // in the pet grove on narrow screens, zoom in so pets and apples are big
+  if(Grove.active && r < 16 / 9){ W = 1100; H = Math.min(3200, W / r); minX = 800 - W / 2; }
+  svg.setAttribute('viewBox', `${minX} ${900 - H} ${W} ${H}`);
   if(Arena.built) Arena.fitSign();
 }
 window.addEventListener('resize', fitView);
@@ -2105,11 +2139,20 @@ const Shop = {
    PETS — adopt, feed and care for animal friends
    ================================================================ */
 const GroundPets = {
-  units:{}, zone:{ x1:175, x2:680, y1:778, y2:862 },
+  units:{}, HOME_ZONE:{ x1:175, x2:680, y1:778, y2:862 }, zone:null,
   init(){
     this.layer = $('#petsG');
+    this.zone = this.HOME_ZONE;
     this.sync();
     this.wanderLoop();
+  },
+  setZone(z){
+    this.zone = z;
+    for(const id in this.units){
+      const u = this.units[id];
+      u.x = rand(z.x1, z.x2); u.y = rand(z.y1, z.y2);
+      this.place(u);
+    }
   },
   defs(){ return PETS_DEF.filter(p => !p.dragon); },
   sync(){
@@ -2158,22 +2201,41 @@ const GroundPets = {
     };
     setTimeout(step, 2000);
   },
-  /* tap = pat: hearts and a happy hop */
-  pat(u){
+  hop(u){
     if(u.busy) return;
     u.busy = true;
+    tween(420, t => { u.inner.setAttribute('transform', `translate(0 ${-20 * Math.sin(Math.PI * t)})`); })
+      .then(() => { u.inner.removeAttribute('transform'); u.busy = false; });
+  },
+  runTo(u, tx, ty){
+    if(u.busy) return Promise.resolve();
+    u.busy = true;
+    u.dir = tx < u.x ? -1 : 1;
+    u.g.classList.add('walking');
+    const fx0 = u.x, fy0 = u.y;
+    return tween(Math.max(450, Math.hypot(tx - fx0, ty - fy0) * 6), t => { u.x = lerp(fx0, tx, t); u.y = lerp(fy0, ty, t); this.place(u); })
+      .then(() => { u.g.classList.remove('walking'); u.busy = false; });
+  },
+  /* tap = pat (or feed, if the pet is hungry and we have stars) */
+  pat(u){
+    if(u.busy) return;
+    if(Pets.hungry(u.id)){
+      if(totalStars >= Pets.FEED_COST){ Pets.feed(u.id); return; }
+      play('aw');
+      speak('We need more stars to buy food!');
+      return;
+    }
     play('pop');
     fxFloatText(u.x, u.y - 52, '❤', '#e2574c');
     if(u.id === 'unicorn') fxFloatText(u.x + 16, u.y - 66, '✨', '#b59ce8');
-    tween(420, t => { u.inner.setAttribute('transform', `translate(0 ${-20 * Math.sin(Math.PI * t)})`); })
-      .then(() => { u.inner.removeAttribute('transform'); u.busy = false; });
+    this.hop(u);
   },
   feedAnim(id){
     const u = this.units[id];
     if(!u) return;
     fxFloatText(u.x, u.y - 54, '🍖');
     setTimeout(() => fxFloatText(u.x, u.y - 60, '❤', '#e2574c'), 600);
-    if(!u.busy) this.pat(u);
+    this.hop(u);
     this.refreshBubbles();
   }
 };
@@ -2267,7 +2329,7 @@ const Pets = {
   feed(id, card){
     if(!this.hungry(id)) return;
     if(totalStars < this.FEED_COST){
-      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      if(card){ card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
       play('aw');
       return;
     }
@@ -2281,7 +2343,333 @@ const Pets = {
     const d = Dragon.byId(id);
     if(d && Dragon.owned(d)) Dragon.greet(d);
     else GroundPets.feedAnim(id);
+    if(Grove.active) Grove.refreshHud();
     this.render();
+  }
+};
+
+/* ================================================================
+   PET GROVE — a cozy glade to play with the pets
+   ================================================================ */
+const Grove = {
+  active:false, built:false,
+  HIDES: Arena.HIDES.filter(s => s !== '#dragonsG'),
+  dragonSpots:[[885, 752],[300, 582],[1320, 742]],
+  appleSpots:[[360, 420],[452, 378],[545, 420],[312, 480],[430, 468],[535, 488],[378, 540],[505, 545]],
+  build(){
+    if(this.built){ this.refreshItems(); return; }
+    this.built = true;
+    const g = $('#groveG');
+    // the big friendly tree
+    el('rect', { x:430, y:560, width:44, height:160, rx:18, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':4 }, g);
+    el('path', { d:'M 446 600 q -34 -20 -44 -48 M 458 626 q 30 -18 42 -44', stroke:'#6c4426', 'stroke-width':7, fill:'none', 'stroke-linecap':'round' }, g);
+    el('circle', { cx:452, cy:432, r:122, fill:'#4e9b44' }, g);
+    el('circle', { cx:348, cy:486, r:86, fill:'#449155' }, g);
+    el('circle', { cx:560, cy:474, r:92, fill:'#5fae4f' }, g);
+    el('circle', { cx:452, cy:502, r:100, fill:'#5fae4f' }, g);
+    el('circle', { cx:400, cy:400, r:30, fill:'#ffffff', opacity:.18 }, g);
+    // picnic basket: tap to play the Word Picnic
+    const bk = el('text', { x:718, y:806, 'text-anchor':'middle', 'font-size':46, cursor:'pointer' }, g);
+    bk.textContent = '🧺';
+    this.hint = el('text', { x:718, y:744, 'text-anchor':'middle', 'font-size':24, class:'hbub', cursor:'pointer' }, g);
+    this.hint.textContent = '🍎';
+    bk.addEventListener('click', () => Picnic.start());
+    this.hint.addEventListener('click', () => Picnic.start());
+    this.itemsG = el('g', {}, g);
+    this.applesG = el('g', {}, g);
+    this.refreshItems();
+  },
+  showHint(on){ if(this.hint) this.hint.setAttribute('visibility', on ? 'visible' : 'hidden'); },
+  refreshItems(){
+    const ig = this.itemsG;
+    ig.innerHTML = '';
+    if(Shop.on('playcastle')) this.buildPlayCastle(ig);
+    if(Shop.on('slide')) this.buildSlide(ig);
+    if(Shop.on('pond')) this.buildPond(ig);
+    if(Shop.on('ball')) this.spawnBall(ig);
+  },
+  enter(){
+    audioInit();
+    Game.clearField();
+    Parade.stop();
+    this.build();
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = 'none'; });
+    $('#groveG').style.display = '';
+    this.active = true;
+    GroundPets.setZone({ x1:270, x2:1330, y1:758, y2:866 });
+    Dragon.visibleList().forEach((d, i) => {
+      const p = this.dragonSpots[i % this.dragonSpots.length];
+      d.px = p[0]; d.py = p[1];
+      Dragon.setHome(d);
+    });
+    UI.show('grove');
+    this.refreshHud();
+    this.showHint(true);
+    fitView();
+    speak('Welcome to the pet grove!');
+  },
+  exit(){
+    this.active = false;
+    Picnic.stop();
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = ''; });
+    $('#groveG').style.display = 'none';
+    applyDecor();
+    Dragon.list.forEach(d => {
+      const def = Dragon.DEFS.find(x => x.id === d.id);
+      d.px = def.px; d.py = def.py;
+      Dragon.setHome(d);
+    });
+    GroundPets.setZone(GroundPets.HOME_ZONE);
+    fitView();
+    UI.show('title');
+  },
+  refreshHud(){
+    $('#hudStars').textContent = totalStars;
+    $('#hudWave').textContent = '🐾';
+    $('#hudStage').style.display = 'none';
+  },
+  /* --- purchasable grove toys --- */
+  buildPlayCastle(ig){
+    const c = el('g', { class:'apple' }, ig);
+    el('rect', { x:795, y:706, width:128, height:86, rx:8, fill:'#ffe9c9', stroke:'#d9a05f', 'stroke-width':4 }, c);
+    for(let i = 0; i < 4; i++) el('rect', { x:801 + i * 33, y:694, width:18, height:14, fill:'#ffe9c9', stroke:'#d9a05f', 'stroke-width':3 }, c);
+    el('rect', { x:778, y:672, width:36, height:120, rx:7, fill:'#ffd9e3', stroke:'#d886a8', 'stroke-width':4 }, c);
+    el('polygon', { points:'772,672 796,640 820,672', fill:'#d96aa7', stroke:'#b04f8a', 'stroke-width':3 }, c);
+    el('line', { x1:796, y1:642, x2:796, y2:620, stroke:'#8d5a33', 'stroke-width':3.5 }, c);
+    el('path', { class:'flag', d:'M 796 622 L 820 628 L 796 634 Z', fill:'#ffc83d' }, c);
+    el('path', { d:'M 845 792 L 845 746 Q 862 728 879 746 L 879 792 Z', fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':3 }, c);
+    this.castlePeek = { x:862, y:788 };
+    c.addEventListener('click', () => this.peekaboo());
+  },
+  async peekaboo(){
+    if(this.peeking) return;
+    this.peeking = true;
+    play('pop');
+    const friends = Pets.careList();
+    const em = friends.length ? pickRand(friends).emoji : '🐭';
+    const t = el('text', { 'text-anchor':'middle', 'font-size':30 }, $('#groveG'));
+    t.textContent = em;
+    const { x, y } = this.castlePeek;
+    await tween(360, k => t.setAttribute('transform', `translate(${x} ${lerp(y + 26, y - 28, easeOut(k))})`));
+    fxFloatText(x, y - 58, '❤', '#e2574c');
+    play('yay');
+    await sleep(800);
+    await tween(300, k => t.setAttribute('transform', `translate(${x} ${lerp(y - 28, y + 28, easeIn(k))})`));
+    t.remove();
+    this.peeking = false;
+  },
+  buildSlide(ig){
+    el('rect', { x:955, y:642, width:70, height:12, rx:5, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3 }, ig);
+    el('line', { x1:962, y1:654, x2:946, y2:758, stroke:'#8d5a33', 'stroke-width':6 }, ig);
+    el('line', { x1:990, y1:654, x2:976, y2:758, stroke:'#8d5a33', 'stroke-width':6 }, ig);
+    for(let i = 1; i <= 4; i++){ el('line', { x1:962 - i * 3.2, y1:654 + i * 21, x2:988 - i * 2.8, y2:654 + i * 21, stroke:'#8d5a33', 'stroke-width':4 }, ig); }
+    const slope = el('path', { class:'apple', d:'M 1018 648 C 1080 672 1112 716 1152 752 L 1128 770 C 1086 730 1054 696 1008 662 Z', fill:'#ffc83d', stroke:'#e8a200', 'stroke-width':3 }, ig);
+    slope.addEventListener('click', () => this.slideRide());
+  },
+  async slideRide(){
+    const ids = Object.keys(GroundPets.units);
+    if(!ids.length || this.sliding) return;
+    const u = GroundPets.units[pickRand(ids)];
+    if(!u || u.busy) return;
+    this.sliding = true;
+    await GroundPets.runTo(u, 958, 800);
+    u.busy = true;
+    await tween(700, t => { u.x = lerp(958, 988, t); u.y = lerp(800, 640, t); GroundPets.place(u); });
+    play('whoosh');
+    await tween(620, t => { const k = easeIn(t); u.x = lerp(1002, 1146, k); u.y = lerp(638, 752, k); GroundPets.place(u); });
+    fxFloatText(u.x, u.y - 52, 'Wheee!', '#4f9dde');
+    fxDust(u.x + 10, u.y + 4);
+    play('yay');
+    u.busy = false;
+    GroundPets.hop(u);
+    this.sliding = false;
+  },
+  buildPond(ig){
+    const p = el('g', { class:'apple' }, ig);
+    el('ellipse', { cx:1250, cy:806, rx:120, ry:38, fill:'#74b9ea', stroke:'#5a9dd4', 'stroke-width':3.5 }, p);
+    el('ellipse', { cx:1228, cy:798, rx:54, ry:14, fill:'#a8d4f4', opacity:.7 }, p);
+    const lily = el('text', { x:1192, y:812, 'font-size':18, 'text-anchor':'middle' }, p);
+    lily.textContent = '🪷';
+    el('path', { d:'M 1140 786 q -4 -22 2 -34 M 1152 788 q 2 -24 10 -32', stroke:'#3e8a3e', 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, p);
+    p.addEventListener('click', () => this.fishJump());
+  },
+  async fishJump(){
+    if(this.fishing) return;
+    this.fishing = true;
+    play('splash');
+    fxSplash(1210, 800);
+    const f = el('text', { 'text-anchor':'middle', 'font-size':26 }, $('#groveG'));
+    f.textContent = '🐟';
+    await tween(950, t => {
+      const x = lerp(1200, 1300, t), y = 800 - 110 * 4 * t * (1 - t);
+      f.setAttribute('transform', `translate(${x} ${y}) rotate(${lerp(-40, 80, t)})`);
+    });
+    f.remove();
+    fxSplash(1300, 800);
+    play('splash');
+    this.fishing = false;
+  },
+  spawnBall(ig){
+    const keepX = this.ball ? this.ball.x : 860;
+    const b = el('g', { class:'apple' }, ig);
+    el('circle', { r:20, fill:'#ffffff', stroke:'#c0392b', 'stroke-width':3 }, b);
+    el('path', { d:'M -20 0 a 20 20 0 0 1 40 0 Z', fill:'#e2574c' }, b);
+    el('circle', { r:5.5, fill:'#ffc83d' }, b);
+    this.ball = { x:keepX, y:828, rot:0, rolling:false, g:b };
+    this.placeBall();
+    b.addEventListener('click', () => this.pushBall());
+  },
+  placeBall(){ const o = this.ball; o.g.setAttribute('transform', `translate(${o.x} ${o.y}) rotate(${o.rot})`); },
+  async pushBall(){
+    const o = this.ball;
+    if(!o || o.rolling) return;
+    o.rolling = true;
+    play('pop');
+    const dir = o.x > 1100 ? -1 : o.x < 420 ? 1 : (Math.random() < .5 ? -1 : 1);
+    const tx = Math.max(330, Math.min(1280, o.x + rand(150, 300) * dir));
+    const fx0 = o.x;
+    await tween(900, t => {
+      o.x = lerp(fx0, tx, easeOut(t));
+      o.rot += (tx - fx0) * .004;
+      o.y = 828 - Math.abs(Math.sin(t * Math.PI * 2.2)) * 18 * (1 - t);
+      this.placeBall();
+    });
+    o.y = 828; this.placeBall();
+    // a friend gives chase!
+    const ids = Object.keys(GroundPets.units);
+    if(ids.length){
+      const u = GroundPets.units[pickRand(ids)];
+      if(u && !u.busy){
+        await GroundPets.runTo(u, o.x + (o.x > u.x ? -44 : 44), Math.min(862, Math.max(770, o.y)));
+        GroundPets.hop(u);
+        fxFloatText(u.x, u.y - 52, '❤', '#e2574c');
+      }
+    }
+    o.rolling = false;
+  }
+};
+
+/* ================================================================
+   WORD PICNIC — the grove's own word game: pick letter-apples in
+   order to spell the picture word, and fill the picnic basket
+   ================================================================ */
+const Picnic = {
+  running:false, words:[], wi:0, word:'', emoji:'', idx:0,
+  start(){
+    if(this.running || !Grove.active) return;
+    this.running = true;
+    Grove.showHint(false);
+    const pool = WB_WORDS.filter(w => w[1].length === 3);
+    this.words = [];
+    const used = new Set();
+    for(let i = 0; i < 3; i++){
+      const cands = pool.filter(w => !used.has(w[1]));
+      const w = pickRand(cands.length ? cands : pool);
+      used.add(w[1]);
+      this.words.push(w);
+    }
+    this.wi = 0;
+    this.nextWord();
+  },
+  nextWord(){
+    const entry = this.words[this.wi];
+    this.emoji = entry[0]; this.word = entry[1]; this.idx = 0;
+    this.barShow();
+    this.spawnApples();
+    speak(`${this.word.toLowerCase()}! Let's pick the letters for ${this.word.toLowerCase()}!`);
+  },
+  barShow(){
+    Bar.show();
+    $('#choices').innerHTML = '';
+    const chip = $('#chipSym');
+    chip.textContent = this.emoji;
+    chip.style.fontSize = '40px';
+    chip.style.lineHeight = '';
+    Bar.current = { mode:'picnic', bannerText:this.emoji, speech:`${this.word.toLowerCase()}! Let's pick the letters for ${this.word.toLowerCase()}!` };
+    this.updatePrompt();
+  },
+  updatePrompt(){
+    const p = $('#prompt');
+    p.style.fontSize = '26px';
+    p.style.letterSpacing = '7px';
+    p.style.fontWeight = '800';
+    p.style.color = '#27355c';
+    p.textContent = this.word.split('').map((ch, i) => i < this.idx ? ch.toLowerCase() : '·').join(' ');
+  },
+  restoreBar(){
+    Bar.hide();
+    const p = $('#prompt');
+    p.style.fontSize = ''; p.style.letterSpacing = ''; p.style.fontWeight = ''; p.style.color = '';
+  },
+  spawnApples(){
+    const g = Grove.applesG;
+    g.innerHTML = '';
+    const letters = this.word.split('');
+    while(letters.length < 8) letters.push(pickRand(ALPHA));
+    const spots = shuffle(Grove.appleSpots);
+    this.apples = [];
+    shuffle(letters).forEach((L, i) => {
+      const [x, y] = spots[i];
+      const a = el('g', { class:'apple', transform:`translate(${x} ${y})` }, g);
+      el('circle', { r:34, fill:'#e2574c', stroke:'#b13d34', 'stroke-width':3.5 }, a);
+      el('circle', { cx:-10, cy:-12, r:9, fill:'#ffffff', opacity:.3 }, a);
+      el('path', { d:'M 0 -32 q 2 -10 8 -14', stroke:'#6c4426', 'stroke-width':4, fill:'none', 'stroke-linecap':'round' }, a);
+      el('path', { d:'M 6 -42 q 14 -6 18 4 q -12 6 -18 -4 Z', fill:'#5fae4f' }, a);
+      const t = el('text', { y:11, 'text-anchor':'middle', 'font-size':30, 'font-weight':'800', fill:'#ffffff' }, a);
+      t.textContent = L.toLowerCase();
+      const apple = { g:a, letter:L.toUpperCase(), x, y, used:false };
+      a.addEventListener('click', () => this.tapApple(apple));
+      this.apples.push(apple);
+    });
+  },
+  tapApple(a){
+    if(!this.running || a.used) return;
+    if(a.letter === this.word[this.idx]){
+      a.used = true;
+      announceLetter(a.letter);
+      play('pok');
+      const bx = 718, by = 782;
+      tween(700, t => {
+        const x = lerp(a.x, bx, t), y = lerp(a.y, by, t) - 90 * 4 * t * (1 - t) * .4;
+        a.g.setAttribute('transform', `translate(${x} ${y}) rotate(${t * 240}) scale(${1 - .35 * t})`);
+      }).then(() => { fxPoof(bx, by - 10); a.g.remove(); });
+      this.idx++;
+      this.updatePrompt();
+      if(this.idx >= this.word.length) setTimeout(() => this.wordDone(), 900);
+    } else {
+      play('tick');
+      tween(380, t => a.g.setAttribute('transform', `translate(${a.x} ${a.y}) rotate(${Math.sin(t * Math.PI * 4) * 10})`))
+        .then(() => a.g.setAttribute('transform', `translate(${a.x} ${a.y})`));
+    }
+  },
+  wordDone(){
+    totalStars += 1;
+    store.set('lc.stars.v1', totalStars);
+    Grove.refreshHud();
+    fxBurst(718, 758);
+    fxFloatText(718, 738, '+1 ⭐');
+    play('yay');
+    speak(`${spellOut(this.word)}. ${this.word.toLowerCase()}! ${pickRand(PRAISE)}`);
+    Object.values(GroundPets.units).forEach(u => GroundPets.hop(u));
+    this.wi++;
+    if(this.wi < this.words.length) setTimeout(() => { if(this.running) this.nextWord(); }, 2300);
+    else setTimeout(() => { if(this.running) this.finish(); }, 2300);
+  },
+  finish(){
+    confettiBlast();
+    play('fanfare');
+    totalStars += 1;
+    store.set('lc.stars.v1', totalStars);
+    Grove.refreshHud();
+    speak('What a lovely word picnic! You found them all!');
+    Dragon.cheer();
+    this.stop();
+  },
+  stop(){
+    this.running = false;
+    if(Grove.applesG) Grove.applesG.innerHTML = '';
+    this.restoreBar();
+    Grove.showHint(true);
   }
 };
 
@@ -2829,6 +3217,7 @@ const Game = {
         if(token !== this.token) return resolve('aborted');
         Bar.setEnabled(false);
         const pick = q.options[i];
+        announceLetter(pick);
         const correct = pick === q.target;
         if(correct) Bar.markGood(btn);
         else { Bar.markBad(btn); q.wrongs++; }
@@ -2899,6 +3288,8 @@ const Game = {
       Bar.onPick = async (i, btn) => {
         if(token !== this.token) return resolve('aborted');
         Bar.setEnabled(false);
+        if(q.mode === 'numbers') speak(String(q.options[i]));
+        else announceLetter(q.options[i]);
         const correct = q.options[i] === q.target;
         if(correct){
           Bar.markGood(btn);
@@ -3060,7 +3451,9 @@ function buildKidModes(){
   }
 }
 const UI = {
+  current:'title',
   show(name){
+    this.current = name;
     $('#scrTitle').classList.toggle('hidden', name !== 'title');
     $('#scrGate').classList.toggle('hidden', name !== 'gate');
     $('#scrSettings').classList.toggle('hidden', name !== 'settings');
@@ -3069,11 +3462,11 @@ const UI = {
     $('#scrShop').classList.toggle('hidden', name !== 'shop');
     $('#scrPets').classList.toggle('hidden', name !== 'pets');
     $('#scrLeave').classList.add('hidden');
-    const inGame = name === 'game' || name === 'wave' || name === 'over';
+    const inGame = name === 'game' || name === 'wave' || name === 'over' || name === 'grove';
     $('#hud').classList.toggle('hidden', !inGame);
     if(name === 'game') Bar.show(); else Bar.hide();
     if(name === 'title'){ this.refreshTitle(); if(!Parade.on) Parade.start(); }
-    else if(name === 'game'){ Parade.stop(); }
+    else if(name === 'game' || name === 'grove'){ Parade.stop(); }
   },
   refreshTitle(){
     $('#titleStars').textContent = `⭐ ${totalStars} stars collected`;
@@ -3311,15 +3704,19 @@ $('#btnWaveShop').addEventListener('click', () => Shop.open('wave'));
 $('#btnShopDone').addEventListener('click', () => UI.show(Shop.returnTo || 'title'));
 $('#btnPets').addEventListener('click', () => { audioInit(); Pets.open('title'); });
 $('#btnPetsDone').addEventListener('click', () => UI.show(Pets.returnTo || 'title'));
+$('#btnGrove').addEventListener('click', () => Grove.enter());
 $('#gateCancel').addEventListener('click', () => UI.show('title'));
-$('#btnHome').addEventListener('click', () => { $('#scrLeave').classList.remove('hidden'); });
+$('#btnHome').addEventListener('click', () => {
+  if(UI.current === 'grove'){ Grove.exit(); return; }
+  $('#scrLeave').classList.remove('hidden');
+});
 $('#btnStay').addEventListener('click', () => { $('#scrLeave').classList.add('hidden'); });
 $('#btnLeave').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
 $('#btnNextWave').addEventListener('click', () => { Game.waveNum++; Game.clearField(); Game.token++; UI.show('game'); Game.prepareWave(); Game.runWave(Game.token); });
 $('#btnWaveHome').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
 $('#btnRetry').addEventListener('click', () => { Game.clearField(); Game.start(true); });
 $('#btnOverHome').addEventListener('click', () => { Game.clearField(); UI.show('title'); });
-document.addEventListener('pointerdown', audioInit, { once:true });
+document.addEventListener('pointerdown', () => { audioInit(); ttsWarmup(); }, { once:true });
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 /* ---------------- boot ---------------- */

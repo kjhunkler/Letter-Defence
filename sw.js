@@ -1,5 +1,5 @@
 /* Letter Castle service worker — keeps the game playable offline. */
-const CACHE = 'letter-castle-v12';
+const CACHE = 'letter-castle-v13';
 const ASSETS = ['./', './index.html', './record.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
