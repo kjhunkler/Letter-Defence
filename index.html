@@ -290,12 +290,13 @@ button.hud-pill:active{ transform:scale(.94); }
 .bfly-wr{ animation:flut .16s ease-in-out infinite reverse; }
 @keyframes flut{ 0%,100%{ transform:scaleX(1);} 50%{ transform:scaleX(.25);} }
 
-/* ============================= STAR SHOP ============================= */
-#shopInner{ width:100%; max-width:470px; max-height:100%; display:flex; flex-direction:column; background:#eef3fb; border-radius:28px; padding:14px; box-shadow:var(--shadow); }
-#shopHead{ display:flex; justify-content:space-between; align-items:center; padding:4px 8px 10px; flex:0 0 auto; }
-#shopHead h2{ font-size:24px; }
-#shopWallet{ font-size:18px; font-weight:800; color:#a07d12; background:#fff4cc; border:2px solid #f4dd92; border-radius:999px; padding:6px 14px; }
-#shopScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px; }
+/* ============================= STAR SHOP & PETS ============================= */
+#shopInner, #petsInner{ width:100%; max-width:470px; max-height:100%; display:flex; flex-direction:column; background:#eef3fb; border-radius:28px; padding:14px; box-shadow:var(--shadow); }
+#shopHead, #petsHead{ display:flex; justify-content:space-between; align-items:center; padding:4px 8px 10px; flex:0 0 auto; }
+#shopHead h2, #petsHead h2{ font-size:24px; }
+#shopWallet, #petsWallet{ font-size:18px; font-weight:800; color:#a07d12; background:#fff4cc; border:2px solid #f4dd92; border-radius:999px; padding:6px 14px; }
+#shopScroll, #petsScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px; }
+.list-h{ font-size:13px; text-transform:uppercase; letter-spacing:1.2px; color:#8d97b5; margin:10px 4px 8px; }
 .shop-card{ display:flex; align-items:center; gap:12px; background:#fff; border-radius:18px; padding:12px 14px; margin-bottom:10px; box-shadow:0 3px 10px rgba(39,53,92,.07); }
 .shop-card.shake{ animation:shakeBtn .4s; }
 .shop-icon{ font-size:38px; width:52px; text-align:center; flex:0 0 auto; }
@@ -307,19 +308,48 @@ button.hud-pill:active{ transform:scale(.94); }
 .shop-buy.cant{ filter:grayscale(.75); opacity:.6; }
 .shop-toggle{ flex:0 0 auto; border:2.5px solid #e6eaf4; color:#b6bdd1; font-size:14px; font-weight:800; border-radius:999px; padding:9px 14px; white-space:nowrap; }
 .shop-toggle.on{ border-color:var(--good); background:#e9f9f0; color:var(--good-dark); }
-#shopFoot{ padding-top:10px; display:flex; justify-content:center; flex:0 0 auto; }
-#shopFoot .big-btn{ width:100%; font-size:20px; padding:12px; }
+#shopFoot, #petsFoot{ padding-top:10px; display:flex; justify-content:center; flex:0 0 auto; }
+#shopFoot .big-btn, #petsFoot .big-btn{ width:100%; font-size:20px; padding:12px; }
+
+/* kid-facing mode picker on the title screen */
+#kidModes{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:10px; }
+.kid-chip{ display:flex; flex-direction:column; align-items:center; gap:1px; width:58px; padding:7px 2px; border-radius:14px; background:#fff; border:2.5px solid #e8e0cb; box-shadow:0 3px 0 #e3d3ae; }
+.kid-chip:active{ transform:translateY(2px); box-shadow:0 1px 0 #e3d3ae; }
+.kid-chip.sel{ border-color:var(--blue); background:#eef6fe; box-shadow:0 3px 0 #b7d6f1; }
+.kc-i{ font-size:20px; line-height:1.1; }
+.kc-l{ font-size:9.5px; font-weight:800; color:#7c87a6; }
+
+/* wandering pets */
+.gpet{ cursor:pointer; }
+.gpet .gpet-inner{ transform-box:fill-box; transform-origin:center bottom; }
+.gpet.walking .gpet-inner{ animation:petHop .3s ease-in-out infinite; }
+@keyframes petHop{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
+.gpet .hbub{ animation:bubPulse 1.6s ease-in-out infinite; }
+@keyframes bubPulse{ 0%,100%{ opacity:.5;} 50%{ opacity:1;} }
+.dragon-unit{ cursor:pointer; }
 
 /* dragon + banner decorations */
-#dragonG .dwing{ transform-box:fill-box; transform-origin:left bottom; animation:wingIdle 3.2s ease-in-out infinite; }
-#dragonG.flying .dwing{ animation:wingFlap .18s ease-in-out infinite; }
+.dragon-unit .dwing{ transform-box:fill-box; transform-origin:left bottom; animation:wingIdle 3.2s ease-in-out infinite; }
+.dragon-unit.flying .dwing{ animation:wingFlap .18s ease-in-out infinite; }
 @keyframes wingIdle{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(-9deg);} }
 @keyframes wingFlap{ 0%,100%{ transform:rotate(16deg);} 50%{ transform:rotate(-28deg);} }
-#dragonG .dtail{ transform-box:fill-box; transform-origin:left center; animation:tailSway 4s ease-in-out infinite; }
+.dragon-unit .dtail{ transform-box:fill-box; transform-origin:left center; animation:tailSway 4s ease-in-out infinite; }
 @keyframes tailSway{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(9deg);} }
-#dragonG .deye{ transition:transform .08s; transform-box:fill-box; transform-origin:center; }
+.dragon-unit .deye{ transition:transform .08s; transform-box:fill-box; transform-origin:center; }
 .bannerSway{ transform-box:fill-box; transform-origin:center top; animation:bannerSwing 3.5s ease-in-out infinite; }
 @keyframes bannerSwing{ 0%,100%{ transform:rotate(-1.5deg);} 50%{ transform:rotate(1.5deg);} }
+
+/* word joust arena */
+#arenaG .legA, #arenaG .legB{ transform-box:fill-box; transform-origin:center top; }
+.knight.gallop .legA{ animation:kgal .22s ease-in-out infinite; }
+.knight.gallop .legB{ animation:kgal .22s ease-in-out infinite reverse; }
+@keyframes kgal{ 0%,100%{ transform:rotate(24deg);} 50%{ transform:rotate(-24deg);} }
+.knight .kbody{ transform-box:fill-box; transform-origin:center bottom; }
+.knight.gallop .kbody{ animation:kbob .24s ease-in-out infinite; }
+@keyframes kbob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-4px);} }
+#arenaG .spec{ transform-box:fill-box; transform-origin:center bottom; }
+#arenaG.crowd-bounce .spec{ animation:specJump .45s ease-in-out 4; }
+@keyframes specJump{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
 
 /* fx particles (driven by CSS vars set inline) */
 .part{ animation:partFly .6s ease-out forwards; }
@@ -493,13 +523,17 @@ button.hud-pill:active{ transform:scale(.94); }
       <!-- troops & fx -->
       <g id="troops"></g>
       <!-- bridge parapet lip (in front of troops) -->
-      <path d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
+      <path id="parapetLip" d="M 808 694 Q 885 666 962 694" fill="none" stroke="#bda88e" stroke-width="10" stroke-linecap="round"/>
       <g id="fx"></g>
-      <!-- pet dragon (above troops so he can swoop over them) -->
-      <g id="dragonG" style="display:none"></g>
+      <!-- pet dragons (above troops so they can swoop over them) -->
+      <g id="dragonsG"></g>
       <g id="decorFront"></g>
+      <!-- word joust arena (replaces the castle scene during a joust) -->
+      <g id="arenaG" style="display:none"></g>
       <!-- word-builder sign (above foreground decor so it's never hidden) -->
       <g id="wordSignG"></g>
+      <!-- adopted pets wandering the meadow -->
+      <g id="petsG"></g>
       <g id="bflyLayer"></g>
 
       <!-- invisible walking guide -->
@@ -535,8 +569,12 @@ button.hud-pill:active{ transform:scale(.94); }
       <h1>Letter Castle</h1>
       <div class="sub">Defend the snacks — match the letters!</div>
       <div id="titleStars">⭐ 0 stars collected</div><br>
-      <button class="big-btn" id="btnPlay">▶ &nbsp;Play</button><br>
-      <button class="soft-btn" id="btnShop">⭐ Star Shop</button>
+      <button class="big-btn" id="btnPlay">▶ &nbsp;Play</button>
+      <div id="kidModes"></div>
+      <div style="margin-top:6px;">
+        <button class="soft-btn" id="btnShop">⭐ Star Shop</button>
+        <button class="soft-btn" id="btnPets">🐾 Pets</button>
+      </div>
       <div id="modePill">Letter Match • 3 choices • Steady</div>
     </div>
   </div>
@@ -571,7 +609,9 @@ button.hud-pill:active{ transform:scale(.94); }
           <button class="opt" data-key="mode" data-val="sounds"><span class="icon">🐶</span><span>First Sounds<span class="opt-sub">Which letter starts the picture?</span></span></button>
           <button class="opt" data-key="mode" data-val="words"><span class="icon">✏️</span><span>Word Builder<span class="opt-sub">Drop letters into slots to spell words</span></span></button>
           <button class="opt" data-key="mode" data-val="numbers"><span class="icon">🔢</span><span>Numbers<span class="opt-sub">Count the pictures, pick the number</span></span></button>
+          <button class="opt" data-key="mode" data-val="joust"><span class="icon">⚔️</span><span>Word Joust<span class="opt-sub">Pick the first letter to win the joust!</span></span></button>
         </div>
+        <div class="switch-row" style="margin-top:10px;"><span>Child can pick the mode on the title screen</span><button class="switch" id="swKidModes" aria-label="Mode picker for the child"></button></div>
       </div>
 
       <div class="set-card hidden" id="cardCampaign">
@@ -759,6 +799,20 @@ button.hud-pill:active{ transform:scale(.94); }
   </div>
 </div>
 
+<!-- ============ PETS ============ -->
+<div id="scrPets" class="overlay dimmed hidden">
+  <div id="petsInner">
+    <div id="petsHead">
+      <h2>🐾 My Pets</h2>
+      <div id="petsWallet">⭐ 0</div>
+    </div>
+    <div id="petsScroll"></div>
+    <div id="petsFoot">
+      <button class="big-btn blue" id="btnPetsDone">✔ &nbsp;Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ LEAVE CONFIRM ============ -->
 <div id="scrLeave" class="overlay dimmed hidden">
   <div class="card">
@@ -883,6 +937,12 @@ const CAMPAIGN_DEFAULT = [
   { mode:'sounds', soundsCase:'lower', optionCount:3 },
   { mode:'sounds', soundsCase:'upper', optionCount:4 }
 ];
+/* Word Joust: CVC words (consonant onset + vowel-consonant rime) */
+const JOUST_WORDS = WB_WORDS.filter(w => w[1].length === 3 && !'AEIOU'.includes(w[1][0]));
+/* every word we know with a picture, for "you spelled BAT!" moments */
+const WORD_EMOJI = {};
+WB_WORDS.forEach(([e, w]) => { if(!WORD_EMOJI[w]) WORD_EMOJI[w] = e; });
+Object.values(WORDS).forEach(list => list.forEach(([e, w]) => { const k = w.toUpperCase(); if(!WORD_EMOJI[k]) WORD_EMOJI[k] = e; }));
 const TROOP_COLORS = [['#e2574c','#b13d34'],['#4f9dde','#356fa3'],['#8e6fc1','#67498f'],['#4db36b','#33824a'],['#e6a23c','#b3782a'],['#d96aa7','#a3477b']];
 const PRAISE = ['Great job!','You got it!','Amazing!','Wonderful!','Hooray!','Super!'];
 const GENTLE = ['Almost! Try again!','Keep looking!','You can do it!','Hmm, not that one!'];
@@ -899,7 +959,7 @@ const DEFAULTS = {
   optionCount:3, difficulty:'steady', waveLength:8, pantrySize:5,
   wordLen:'3', soundsCase:'lower', numMax:'5',
   campaign: CAMPAIGN_DEFAULT,
-  sfx:true, voice:true, phonics:true
+  sfx:true, voice:true, phonics:true, kidModes:true
 };
 const storedSettings = store.get('lc.settings.v1', null);
 let S = Object.assign({}, DEFAULTS, storedSettings || {});
@@ -923,11 +983,24 @@ const SHOP_ITEMS = [
   { id:'flags',   icon:'🌈', name:'Rainbow Flags', desc:'Bright new flags for every tower', cost:12 },
   { id:'garden',  icon:'🌻', name:'Castle Garden', desc:'Sunflowers and blossoms along the wall', cost:18 },
   { id:'banners', icon:'👑', name:'Royal Banners', desc:'Grand star banners on the gatehouse', cost:25 },
-  { id:'dragon',  icon:'🐲', name:'Pet Dragon', desc:'Guards the gate! Once each round he scares away a troop that gets too close', cost:40 }
+  { id:'dragon',  icon:'🐲', name:'Pet Dragon', desc:'Guards the gate! Each dragon you own scares one troop away per round — adopt more in 🐾 Pets', cost:40 }
 ];
 let SHOP = store.get('lc.shop.v1', { owned:[], shown:{} });
 if(!Array.isArray(SHOP.owned)) SHOP.owned = [];
 if(!SHOP.shown || typeof SHOP.shown !== 'object') SHOP.shown = {};
+/* adoptable pets (dragons perch on towers; the rest wander the meadow) */
+const PETS_DEF = [
+  { id:'bunny',   emoji:'🐰', name:'Bunny',   cost:12, desc:'Hops around the meadow — tap to pat!' },
+  { id:'puppy',   emoji:'🐶', name:'Puppy',   cost:15, desc:'A loyal friend for the castle grounds' },
+  { id:'kitten',  emoji:'🐱', name:'Kitten',  cost:15, desc:'Prowls the meadow looking adorable' },
+  { id:'unicorn', emoji:'🦄', name:'Unicorn', cost:30, desc:'Leaves a trail of sparkles ✨' },
+  { id:'ember',   emoji:'🐉', name:'Ember',   cost:45, desc:'A red dragon for the gatehouse — one more rescue each round!', dragon:true },
+  { id:'frost',   emoji:'🐲', name:'Frost',   cost:55, desc:'A blue dragon for the far tower — one more rescue each round!', dragon:true }
+];
+let PETS = store.get('lc.pets.v1', { owned:[], fedAt:{}, love:{} });
+if(!Array.isArray(PETS.owned)) PETS.owned = [];
+if(!PETS.fedAt || typeof PETS.fedAt !== 'object') PETS.fedAt = {};
+if(!PETS.love || typeof PETS.love !== 'object') PETS.love = {};
 /* campaign progress (which stage the child is on) */
 const Campaign = {
   data: store.get('lc.campaign.v1', { stage:0 }),
@@ -1013,7 +1086,9 @@ const SFX = {
   sad(){ [440, 392, 330, 262].forEach((f, i) => note(f, i * .22, .3, 'triangle', .3)); },
   pop(){ note(620, 0, .07, 'triangle', .35); },
   roar(){ note(110, 0, .3, 'sawtooth', .3); note(82, .12, .35, 'sawtooth', .35); noiseBurst(0, .3, 300, 120, .25, 'lowpass'); },
-  flame(){ noiseBurst(0, .4, 900, 250, .5, 'lowpass'); }
+  flame(){ noiseBurst(0, .4, 900, 250, .5, 'lowpass'); },
+  horn(){ [392, 523, 659].forEach((f, i) => note(f, i * .12, .28, 'sawtooth', .22)); },
+  clang(){ noiseBurst(0, .18, 3000, 900, .45, 'highpass'); note(870, 0, .25, 'square', .18); note(620, .04, .3, 'triangle', .25); }
 };
 function play(name){ if(S.sfx && AC) SFX[name] && SFX[name](); }
 
@@ -1041,7 +1116,8 @@ const Phonics = {
   },
   count(){ return Object.keys(this.manifest).length; },
   keyFor(q){
-    if(S.phonics === false || !q || q.mode === 'numbers') return null;
+    // joust excluded here: playing the onset sound up front would give the answer away
+    if(S.phonics === false || !q || q.mode === 'numbers' || q.mode === 'joust') return null;
     const k = String(q.target || '').toLowerCase();
     return this.manifest[k] ? k : null;
   },
@@ -1084,6 +1160,7 @@ function fitView(){
   if(r < 16 / 9){ W = 1600; H = Math.min(3200, 1600 / r); }
   else { H = 900; W = Math.min(5600, 900 * r); }
   svg.setAttribute('viewBox', `${(1600 - W) / 2} ${900 - H} ${W} ${H}`);
+  if(Arena.built) Arena.fitSign();
 }
 window.addEventListener('resize', fitView);
 if(window.ResizeObserver) new ResizeObserver(fitView).observe(wrap);
@@ -1489,6 +1566,307 @@ const WordSign = {
 };
 
 /* ================================================================
+   WORD JOUST — tournament arena, two knights, onset vs rime
+   ================================================================ */
+const Arena = {
+  built:false,
+  KY:700, LX:300, RX:1300, MEET:800,
+  HIDES:['#streamG','#roadUnder','#roadTop','#pebbles','#bridgeG','#castleG','#castleDecoG','#bastionG','#cataG','#paddockG','#wordSignG','#parapetLip','#dragonsG'],
+  build(){
+    if(this.built) return;
+    this.built = true;
+    const g = $('#arenaG');
+    // banner frame: big word cards on top (_-at), picture shield below.
+    // the whole sign lives in signG so it can scale up on small screens
+    const sg = this.signG = el('g', {}, g);
+    el('line', { x1:680, y1:645, x2:680, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, sg);
+    el('line', { x1:920, y1:645, x2:920, y2:330, stroke:'#8d5a33', 'stroke-width':9, 'stroke-linecap':'round' }, sg);
+    el('line', { x1:672, y1:334, x2:928, y2:334, stroke:'#6c4426', 'stroke-width':8, 'stroke-linecap':'round' }, sg);
+    const pcols = ['#e2574c','#ffc83d','#4f9dde','#46c07a'];
+    [694, 718, 882, 906].forEach((x, i) => el('path', { d:`M ${x - 8} 338 L ${x + 8} 338 L ${x} 356 Z`, fill:pcols[i % 4], stroke:'#ffffff', 'stroke-width':1.5 }, sg));
+    // the word cards live here (rebuilt for every word, widths vary)
+    this.wordG = el('g', {}, sg);
+    el('line', { x1:768, y1:414, x2:776, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, sg);
+    el('line', { x1:832, y1:414, x2:824, y2:462, stroke:'#5d4426', 'stroke-width':3.5 }, sg);
+    el('path', { d:'M 752 460 h 96 v 50 q 0 24 -48 42 q -48 -18 -48 -42 Z', fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':4 }, sg);
+    this.bannerEmoji = el('text', { x:800, y:520, 'text-anchor':'middle', 'font-size':54 }, sg);
+    this.bannerEmoji.textContent = '🐱';
+    // tents and stands
+    this.tent(g, 110, '#4f9dde', '#356fa3');
+    this.tent(g, 1340, '#e2574c', '#b13d34');
+    this.stand(g, 420); this.stand(g, 1020);
+    // knights (left = the child's champion)
+    this.kL = this.buildKnight(g, '#4f9dde', '#356fa3', false);
+    this.kR = this.buildKnight(g, '#e2574c', '#b13d34', true);
+    // tilt rail in front
+    for(let x = 320; x <= 1280; x += 120){ el('rect', { x:x - 5, y:708, width:10, height:34, rx:3, fill:'#8d5a33', stroke:'#6c4426', 'stroke-width':2 }, g); }
+    el('rect', { x:290, y:702, width:1020, height:13, rx:6, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3 }, g);
+    this.setK(this.kL, this.LX, 0);
+    this.setK(this.kR, this.RX, 0);
+  },
+  tent(g, x, c, dark){
+    el('path', { d:`M ${x} 700 L ${x} 618 L ${x + 150} 618 L ${x + 150} 700 Z`, fill:c, stroke:dark, 'stroke-width':3 }, g);
+    for(let i = 0; i < 3; i++) el('rect', { x:x + 18 + i * 46, y:618, width:18, height:82, fill:'#ffffff', opacity:.65 }, g);
+    el('path', { d:`M ${x - 12} 618 L ${x + 75} 562 L ${x + 162} 618 Z`, fill:dark }, g);
+    el('line', { x1:x + 75, y1:562, x2:x + 75, y2:537, stroke:'#6c4426', 'stroke-width':3.5 }, g);
+    el('path', { class:'flag', d:`M ${x + 75} 539 L ${x + 105} 547 L ${x + 75} 555 Z`, fill:c }, g);
+  },
+  stand(g, x){
+    el('rect', { x:x + 12, y:652, width:10, height:30, fill:'#8d5a33' }, g);
+    el('rect', { x:x + 138, y:652, width:10, height:30, fill:'#8d5a33' }, g);
+    const cols = ['#e6a23c','#8e6fc1','#4db36b','#d96aa7'];
+    for(let i = 0; i < 4; i++){
+      const sx = x + 26 + i * 36;
+      const sp = el('g', { class:'spec' }, g);
+      el('rect', { x:sx - 9, y:616, width:18, height:28, rx:8, fill:cols[i] }, sp);
+      el('circle', { cx:sx, cy:610, r:8.5, fill:'#ffd9b3', stroke:'#deb088', 'stroke-width':2 }, sp);
+    }
+    el('rect', { x, y:642, width:160, height:13, rx:5, fill:'#b98850', stroke:'#8d5a33', 'stroke-width':3 }, g);
+  },
+  buildKnight(parent, color, dark, flip){
+    const root = el('g', { class:'knight' }, parent);
+    const inner = el('g', { class:'kbody' }, root);
+    const horse = flip ? '#b59a78' : '#f0ead8';
+    const horseDark = flip ? '#8d7355' : '#c4b694';
+    el('ellipse', { cx:0, cy:3, rx:34, ry:6, fill:'#000', opacity:.13 }, inner);
+    el('rect', { class:'legA', x:-28, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legB', x:-12, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legA', x:8, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('rect', { class:'legB', x:24, y:-18, width:9, height:20, rx:4, fill:horseDark }, inner);
+    el('path', { d:'M -34 -42 q -16 6 -13 26', stroke:horseDark, 'stroke-width':6, fill:'none', 'stroke-linecap':'round' }, inner);
+    el('ellipse', { cx:0, cy:-36, rx:36, ry:20, fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    // neck + head
+    el('path', { d:'M 26 -44 q 16 -8 22 -28 l 14 7 q -5 24 -22 32 Z', fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    el('ellipse', { cx:58, cy:-68, rx:13, ry:8.5, transform:'rotate(22 58 -68)', fill:horse, stroke:horseDark, 'stroke-width':3 }, inner);
+    el('path', { d:'M 50 -76 l -3 -9 l 8 4 Z', fill:horseDark }, inner);
+    el('circle', { cx:60, cy:-70, r:1.7, fill:'#3e3429' }, inner);
+    // caparison with the letter panel
+    el('rect', { x:-32, y:-52, width:64, height:28, rx:9, fill:color, stroke:dark, 'stroke-width':3 }, inner);
+    el('rect', { x:-24, y:-49, width:48, height:23, rx:6, fill:'#fffbe8', stroke:dark, 'stroke-width':2 }, inner);
+    const txt = el('text', { x:0, y:-31.5, 'text-anchor':'middle', 'font-size':19, 'font-weight':'800', fill:'#27355c' }, inner);
+    txt.textContent = '?';
+    if(flip) txt.setAttribute('transform', 'scale(-1 1)'); // keep letters readable on the mirrored knight
+    // rider
+    el('rect', { x:-16, y:-80, width:25, height:32, rx:11, fill:color, stroke:dark, 'stroke-width':3 }, inner);
+    el('circle', { cx:-3, cy:-88, r:10, fill:'#cfd6e2', stroke:'#9aa3b8', 'stroke-width':2.5 }, inner);
+    el('rect', { x:-13, y:-90, width:20, height:5, rx:2.5, fill:'#9aa3b8' }, inner);
+    el('path', { d:'M -3 -98 q 11 -8 17 -2', stroke:color, 'stroke-width':5, fill:'none', 'stroke-linecap':'round' }, inner);
+    // lance with pennant
+    el('line', { x1:3, y1:-66, x2:88, y2:-54, stroke:'#8d5a33', 'stroke-width':5, 'stroke-linecap':'round' }, inner);
+    el('path', { d:'M 88 -58 L 102 -52 L 86 -48 Z', fill:'#9aa3b8', stroke:'#7b8494', 'stroke-width':2 }, inner);
+    el('path', { class:'flag', d:'M 42 -62 L 64 -58 L 43 -52 Z', fill:color, opacity:.9 }, inner);
+    return { root, inner, txt, flip, x:0, rot:0 };
+  },
+  setK(k, x, rot){
+    k.x = x;
+    if(rot !== undefined) k.rot = rot;
+    k.root.setAttribute('transform', `translate(${x} ${this.KY}) scale(${k.flip ? -1 : 1} 1) rotate(${k.rot || 0})`);
+  },
+  show(){
+    this.build();
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = 'none'; });
+    $('#arenaG').style.display = '';
+    this.fitSign();
+  },
+  /* keep the sign readable on small screens: grow it (anchored at the post
+     bases, up into the sky) until the word letters are ~26 screen px */
+  signScale:1,
+  fitSign(){
+    if(!this.built) return;
+    const vb = svg.viewBox.baseVal;
+    const pxPerUnit = (wrap.clientWidth || 1) / (vb.width || 1600);
+    let s = 26 / (42 * pxPerUnit);
+    const maxByTop = (645 - vb.y - 16) / 311; // never grow past the visible sky
+    s = Math.max(1, Math.min(s, 2.6, maxByTop));
+    this.signScale = s;
+    this.signG.setAttribute('transform', `translate(${800 * (1 - s)} ${645 * (1 - s)}) scale(${s})`);
+  },
+  /* sign-local coords → world coords (for particle effects) */
+  signPoint(x, y){
+    const s = this.signScale || 1;
+    return { x: 800 + (x - 800) * s, y: 645 + (y - 645) * s };
+  },
+  hide(){
+    this.HIDES.forEach(s => { const n = $(s); if(n) n.style.display = ''; });
+    $('#arenaG').style.display = 'none';
+    applyDecor(); // restores the dragon's owned/hidden state
+  },
+  setup(q){
+    this.bannerEmoji.textContent = q.emoji;
+    this.bannerEmoji.removeAttribute('transform');
+    this.buildWordCards(q);
+    this.setK(this.kL, this.LX, 0);
+    this.setK(this.kR, this.RX, 0);
+    this.kL.txt.textContent = '?';
+    this.kR.txt.textContent = q.rime;
+  },
+  /* big readable word display at the top: [ _ ][ at ] */
+  buildWordCards(q){
+    const g = this.wordG;
+    g.innerHTML = '';
+    const oW = 64, rW = 38 * q.rime.length + 26, gap = 10, y = 344, h = 66;
+    const x0 = 800 - (oW + gap + rW) / 2;
+    this.onsetG = el('g', {}, g);
+    this.onsetRect = el('rect', { x:x0, y, width:oW, height:h, rx:12, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':3.5 }, this.onsetG);
+    this.onsetTxt = el('text', { x:x0 + oW / 2, y:y + 47, 'text-anchor':'middle', 'font-size':42, 'font-weight':'800', fill:'#b6bdd1' }, this.onsetG);
+    this.onsetTxt.textContent = '_';
+    this.rimeG = el('g', {}, g);
+    this.rimeRect = el('rect', { x:x0 + oW + gap, y, width:rW, height:h, rx:12, fill:'#fffbe8', stroke:'#d9c79a', 'stroke-width':3.5 }, this.rimeG);
+    this.rimeTxt = el('text', { x:x0 + oW + gap + rW / 2, y:y + 47, 'text-anchor':'middle', 'font-size':42, 'font-weight':'800', fill:'#27355c' }, this.rimeG);
+    this.rimeTxt.textContent = q.rime;
+    this.onsetTxt.style.fontFamily = 'inherit';
+    this.rimeTxt.style.fontFamily = 'inherit';
+  },
+  /* light a card up while its sound plays */
+  hl(part, on){
+    const G = part === 'onset' ? this.onsetG : this.rimeG;
+    const r = part === 'onset' ? this.onsetRect : this.rimeRect;
+    if(!r) return;
+    r.setAttribute('fill', on ? '#ffe27a' : '#fffbe8');
+    r.setAttribute('stroke', on ? '#ff8a5c' : '#d9c79a');
+    r.setAttribute('stroke-width', on ? 5 : 3.5);
+    if(on){
+      const b = r.getBBox(), cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+      tween(280, t => {
+        const s = 1 + .12 * Math.sin(Math.PI * t);
+        G.setAttribute('transform', `translate(${cx * (1 - s)} ${cy * (1 - s)}) scale(${s})`);
+      }).then(() => G.removeAttribute('transform'));
+    }
+  },
+  async enter(){
+    this.setK(this.kL, this.LX - 340, 0); this.setK(this.kR, this.RX + 340, 0);
+    this.kL.root.classList.add('gallop'); this.kR.root.classList.add('gallop');
+    await tween(850, t => {
+      const k = easeOut(t);
+      this.setK(this.kL, lerp(this.LX - 340, this.LX, k));
+      this.setK(this.kR, lerp(this.RX + 340, this.RX, k));
+    });
+    this.kL.root.classList.remove('gallop'); this.kR.root.classList.remove('gallop');
+  },
+  async armLeft(letter){
+    this.kL.txt.textContent = letter.toLowerCase();
+    this.onsetTxt.textContent = letter.toLowerCase();
+    this.onsetTxt.setAttribute('fill', '#27355c');
+    const p = this.signPoint(800 - 60, 377);
+    fxBurst(p.x, p.y);
+    fxBurst(this.kL.x, this.KY - 40);
+    play('pok');
+    await sleep(380);
+  },
+  /* play one piece of the word: the parent's recording if it exists, else the voice */
+  async playPiece(key){
+    if(S.phonics !== false && Phonics.manifest[key]){
+      if(canSpeak){ try{ speechSynthesis.cancel(); }catch(e){} }
+      await Phonics.play(key);
+    } else {
+      speak(key.length === 1 ? key.toUpperCase() : key);
+      await sleep(800);
+    }
+  },
+  /* the freeze in the middle: sound the onset, then the rime — lighting each card */
+  async soundOut(letter, rime){
+    this.hl('onset', true);
+    await this.playPiece(letter.toLowerCase());
+    this.hl('onset', false);
+    await sleep(260);
+    this.hl('rime', true);
+    await this.playPiece(rime);
+    this.hl('rime', false);
+    await sleep(300);
+  },
+  async knightFall(k){
+    play('bonk');
+    const x0 = k.x;
+    await tween(560, t => { this.setK(k, x0 - (k.flip ? -28 : 28) * t, -85 * easeOut(t)); });
+    fxDust(k.x + (k.flip ? 32 : -32), this.KY - 6);
+    fxBurst(k.x, this.KY - 56);
+  },
+  async standUp(k){
+    await tween(420, t => { this.setK(k, k.x, -85 * (1 - easeOut(t))); });
+  },
+  /* the full joust: charge, freeze + sound out, clash, outcome */
+  async charge(q, pick, correct, spelled){
+    play('horn');
+    const L = this.kL, R = this.kR;
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    fxDust(L.x - 34, this.KY - 4); fxDust(R.x + 34, this.KY - 4);
+    const lNear = this.MEET - 125, rNear = this.MEET + 125;
+    const lx0 = L.x, rx0 = R.x;
+    await tween(1250, t => {
+      const k = easeInOut(t);
+      this.setK(L, lerp(lx0, lNear, k));
+      this.setK(R, lerp(rx0, rNear, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    await this.soundOut(pick, q.rime);
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    await tween(420, t => {
+      const k = easeIn(t);
+      this.setK(L, lerp(lNear, this.MEET - 44, k));
+      this.setK(R, lerp(rNear, this.MEET + 44, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    play('clang');
+    fxBurst(this.MEET, this.KY - 64);
+    svg.classList.add('shake'); setTimeout(() => svg.classList.remove('shake'), 300);
+    // the whole word lights up as it's spoken
+    this.hl('onset', true); this.hl('rime', true);
+    if(correct){
+      speak(`${spelled}! ${pickRand(PRAISE)}`);
+      await this.knightFall(R);
+      this.celebrate();
+      await sleep(600);
+    } else {
+      await this.knightFall(L);
+      // whatever was spelled gets read aloud — silly or not
+      const realEmoji = WORD_EMOJI[spelled.toUpperCase()];
+      if(realEmoji){
+        speak(`${spelled}! You spelled ${spelled}!`);
+        await this.flashEmoji(realEmoji, q.emoji);
+      } else {
+        speak(`${spelled}? ${spelled} is a silly word!`);
+        await sleep(1800);
+      }
+    }
+  },
+  celebrate(){
+    $('#arenaG').classList.add('crowd-bounce');
+    setTimeout(() => $('#arenaG').classList.remove('crowd-bounce'), 1900);
+    const em = this.bannerEmoji;
+    tween(800, t => {
+      const s = 1 + .5 * Math.sin(Math.PI * t);
+      em.setAttribute('transform', `translate(${800 * (1 - s)} ${505 * (1 - s)}) scale(${s})`);
+    }).then(() => em.removeAttribute('transform'));
+  },
+  /* the child spelled a different REAL word: show its picture for a moment */
+  async flashEmoji(e, back){
+    const p = this.signPoint(800, 505);
+    fxPoof(p.x, p.y);
+    this.bannerEmoji.textContent = e;
+    await sleep(2000);
+    fxPoof(p.x, p.y);
+    this.bannerEmoji.textContent = back;
+    await sleep(250);
+  },
+  async recover(){
+    await this.standUp(this.kL);
+    const L = this.kL, R = this.kR;
+    L.root.classList.add('gallop'); R.root.classList.add('gallop');
+    const lx0 = L.x, rx0 = R.x;
+    await tween(750, t => {
+      const k = easeInOut(t);
+      this.setK(L, lerp(lx0, this.LX, k));
+      this.setK(R, lerp(rx0, this.RX, k));
+    });
+    L.root.classList.remove('gallop'); R.root.classList.remove('gallop');
+    this.kL.txt.textContent = '?';
+    this.hl('onset', false); this.hl('rime', false);
+    this.onsetTxt.textContent = '_';
+    this.onsetTxt.setAttribute('fill', '#b6bdd1');
+  }
+};
+
+/* ================================================================
    STAR SHOP — decorations bought with stars
    ================================================================ */
 function buildBunting(deco){
@@ -1543,43 +1921,75 @@ function buildGarden(deco){
   emo('🌻', 1372, 748, 22); emo('🌻', 1580, 746, 22); emo('🌻', 1476, 750, 26);
   emo('🪴', 1262, 738, 19); emo('🪴', 1344, 738, 19);
 }
-function buildDragon(){
-  const g = $('#dragonG');
-  g.setAttribute('transform', `translate(${Dragon.PX} ${Dragon.PY})`);
-  const b = el('g', { id:'dragonBody' }, g);
-  el('path', { class:'dtail', d:'M 14 -12 C 30 -10 40 -22 34 -36 C 31 -43 24 -44 22 -38', fill:'none', stroke:'#5fbf77', 'stroke-width':7, 'stroke-linecap':'round' }, b);
-  el('ellipse', { cx:-6, cy:-3, rx:6, ry:4.5, fill:'#4da566' }, b);
-  el('ellipse', { cx:8, cy:-3, rx:6, ry:4.5, fill:'#4da566' }, b);
-  el('ellipse', { cx:2, cy:-17, rx:16, ry:14, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
-  el('ellipse', { cx:-2, cy:-14, rx:8.5, ry:8.5, fill:'#cdeec2' }, b);
-  el('path', { d:'M -4 -30 l 4 -5 l 3 5 M 4 -29 l 4 -5 l 3 5', fill:'none', stroke:'#3f9457', 'stroke-width':2.5, 'stroke-linejoin':'round' }, b);
-  el('path', { class:'dwing', d:'M 6 -26 Q 16 -46 30 -40 Q 24 -32 14 -24 Z', fill:'#8fd6a0', stroke:'#3f9457', 'stroke-width':2 }, b);
-  el('circle', { cx:-15, cy:-33, r:10.5, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
-  el('rect', { x:-33, y:-34, width:14, height:9, rx:4.5, fill:'#5fbf77', stroke:'#3f9457', 'stroke-width':2.5 }, b);
-  el('circle', { cx:-29, cy:-31.5, r:1.3, fill:'#3f9457' }, b);
-  el('path', { d:'M -21 -41 l -3 -7 l 6 2 Z M -12 -42 l -1 -8 l 6 4 Z', fill:'#ffe2ad', stroke:'#d9a05f', 'stroke-width':1.5 }, b);
-  const eye = el('g', { class:'deye' }, b);
-  el('circle', { cx:-18, cy:-36, r:3.2, fill:'#ffffff' }, eye);
-  el('circle', { cx:-19.2, cy:-36, r:1.7, fill:'#27355c' }, eye);
-}
+/* three adoptable dragons — each guards the gate once per round */
 const Dragon = {
-  PX:1466, PY:357, busy:false,
-  setPos(x, y){ $('#dragonG').setAttribute('transform', `translate(${x} ${y})`); },
-  visible(){ return Shop.on('dragon'); },
-  canRescue(troop, stepLen){
-    return this.visible() && !Game.dragonUsed && troop.t + stepLen >= .999;
+  list:[],
+  DEFS:[
+    { id:'dragon', px:1466, py:357, scale:1,   cols:{ body:'#5fbf77', belly:'#cdeec2', wing:'#8fd6a0', dark:'#3f9457', feet:'#4da566' } },
+    { id:'ember',  px:1322, py:449, scale:.85, cols:{ body:'#e2574c', belly:'#ffd9c9', wing:'#f0907e', dark:'#b13d34', feet:'#c84a40' } },
+    { id:'frost',  px:1604, py:430, scale:.8,  cols:{ body:'#6db3e8', belly:'#d9eeff', wing:'#9ccdf0', dark:'#4a82b3', feet:'#5a9dd4' } }
+  ],
+  buildAll(){
+    const layer = $('#dragonsG');
+    for(const def of this.DEFS){
+      const g = el('g', { class:'dragon-unit' }, layer);
+      const c = def.cols;
+      el('path', { class:'dtail', d:'M 14 -12 C 30 -10 40 -22 34 -36 C 31 -43 24 -44 22 -38', fill:'none', stroke:c.body, 'stroke-width':7, 'stroke-linecap':'round' }, g);
+      el('ellipse', { cx:-6, cy:-3, rx:6, ry:4.5, fill:c.feet }, g);
+      el('ellipse', { cx:8, cy:-3, rx:6, ry:4.5, fill:c.feet }, g);
+      el('ellipse', { cx:2, cy:-17, rx:16, ry:14, fill:c.body, stroke:c.dark, 'stroke-width':2.5 }, g);
+      el('ellipse', { cx:-2, cy:-14, rx:8.5, ry:8.5, fill:c.belly }, g);
+      el('path', { d:'M -4 -30 l 4 -5 l 3 5 M 4 -29 l 4 -5 l 3 5', fill:'none', stroke:c.dark, 'stroke-width':2.5, 'stroke-linejoin':'round' }, g);
+      el('path', { class:'dwing', d:'M 6 -26 Q 16 -46 30 -40 Q 24 -32 14 -24 Z', fill:c.wing, stroke:c.dark, 'stroke-width':2 }, g);
+      el('circle', { cx:-15, cy:-33, r:10.5, fill:c.body, stroke:c.dark, 'stroke-width':2.5 }, g);
+      el('rect', { x:-33, y:-34, width:14, height:9, rx:4.5, fill:c.body, stroke:c.dark, 'stroke-width':2.5 }, g);
+      el('circle', { cx:-29, cy:-31.5, r:1.3, fill:c.dark }, g);
+      el('path', { d:'M -21 -41 l -3 -7 l 6 2 Z M -12 -42 l -1 -8 l 6 4 Z', fill:'#ffe2ad', stroke:'#d9a05f', 'stroke-width':1.5 }, g);
+      const eye = el('g', { class:'deye' }, g);
+      el('circle', { cx:-18, cy:-36, r:3.2, fill:'#ffffff' }, eye);
+      el('circle', { cx:-19.2, cy:-36, r:1.7, fill:'#27355c' }, eye);
+      const d = { id:def.id, px:def.px, py:def.py, scale:def.scale, g, eye, busy:false };
+      g.addEventListener('click', () => this.greet(d));
+      this.list.push(d);
+      this.setHome(d);
+    }
   },
-  /* swoop from the perch, puff flame, send the troop scurrying back */
+  owned(d){ return d.id === 'dragon' ? Shop.on('dragon') : Pets.has(d.id); },
+  visibleList(){ return this.list.filter(d => this.owned(d)); },
+  applyVisibility(){ this.list.forEach(d => { d.g.style.display = this.owned(d) ? '' : 'none'; }); },
+  byId(id){ return this.list.find(d => d.id === id); },
+  setPos(d, x, y, rot){ d.g.setAttribute('transform', `translate(${x} ${y}) scale(${d.scale}) rotate(${rot || 0})`); },
+  setHome(d){ this.setPos(d, d.px, d.py); },
+  /* tap a perched dragon: happy wiggle, a lick of flame, hearts */
+  async greet(d){
+    if(d.busy) return;
+    d.busy = true;
+    play('flame');
+    const items = [];
+    for(let i = 0; i < 5; i++){ items.push({ tag:'circle', attrs:{ r:rand(2.5, 5), fill:pickRand(['#ff9d2e','#ffc83d','#ff6b4a']), opacity:.95 }, dx:rand(-40, -16), dy:rand(-6, 12), s:1.6 }); }
+    fxParticles(d.px - 30 * d.scale, d.py - 31 * d.scale, items);
+    fxFloatText(d.px, d.py - 58 * d.scale, '❤', '#e2574c');
+    await tween(550, t => this.setPos(d, d.px, d.py, Math.sin(t * Math.PI * 3) * 8 * (1 - t)));
+    this.setHome(d);
+    d.busy = false;
+  },
+  /* every dragon celebrates a won round */
+  cheer(){ this.visibleList().forEach(d => this.greet(d)); },
+  canRescue(troop, stepLen){
+    return this.visibleList().length > (Game.dragonUses || 0) && troop.t + stepLen >= .999;
+  },
   async rescue(troop, backT){
-    Game.dragonUsed = true; this.busy = true;
-    const g = $('#dragonG');
-    g.classList.add('flying');
+    const avail = this.visibleList();
+    const d = avail[Math.min(Game.dragonUses || 0, avail.length - 1)];
+    Game.dragonUses = (Game.dragonUses || 0) + 1;
+    d.busy = true;
+    d.g.classList.add('flying');
     play('roar');
     speak('Dragon to the rescue!');
     const to = { x:troop.x + 95, y:troop.y - 100 };
     await tween(900, t => {
       const k = easeInOut(t);
-      this.setPos(lerp(this.PX, to.x, k), lerp(this.PY, to.y, k) - 140 * 4 * t * (1 - t) * .35);
+      this.setPos(d, lerp(d.px, to.x, k), lerp(d.py, to.y, k) - 140 * 4 * t * (1 - t) * .35);
     });
     play('flame');
     const items = [];
@@ -1592,28 +2002,30 @@ const Dragon = {
     const run = troop.walkTo(backT, 1100, 'running');
     const home = tween(900, t => {
       const k = easeInOut(t);
-      this.setPos(lerp(to.x, this.PX, k), lerp(to.y, this.PY, k) - 80 * 4 * t * (1 - t));
+      this.setPos(d, lerp(to.x, d.px, k), lerp(to.y, d.py, k) - 80 * 4 * t * (1 - t));
     });
     await Promise.all([run, home]);
-    g.classList.remove('flying');
-    this.busy = false;
+    d.g.classList.remove('flying');
+    d.busy = false;
   },
   startIdle(){
     const blink = () => {
-      const e = document.querySelector('#dragonG .deye');
-      if(e && this.visible() && !this.busy){ e.style.transform = 'scaleY(.15)'; setTimeout(() => { e.style.transform = ''; }, 130); }
-      setTimeout(blink, rand(2800, 7000));
+      const vis = this.visibleList().filter(d => !d.busy);
+      if(vis.length){ const d = pickRand(vis); d.eye.style.transform = 'scaleY(.15)'; setTimeout(() => { d.eye.style.transform = ''; }, 130); }
+      setTimeout(blink, rand(2200, 6000));
     };
     setTimeout(blink, 3000);
     const puff = () => {
-      if(this.visible() && !this.busy && document.visibilityState !== 'hidden'){
+      const vis = this.visibleList().filter(d => !d.busy);
+      if(vis.length && document.visibilityState !== 'hidden'){
+        const d = pickRand(vis);
         const items = [];
         for(let i = 0; i < 3; i++){
           items.push({ tag:'circle', attrs:{ r:rand(2.5, 4.5), fill:'#b9c2cc', opacity:.8 }, dx:rand(-16, -6) - i * 4, dy:rand(-30, -18) - i * 6, s:2.2, cls:'part part-slow' });
         }
-        fxParticles(this.PX - 30, this.PY - 32, items);
+        fxParticles(d.px - 30 * d.scale, d.py - 32 * d.scale, items);
       }
-      setTimeout(puff, rand(8000, 20000));
+      setTimeout(puff, rand(7000, 16000));
     };
     setTimeout(puff, 5000);
   }
@@ -1628,7 +2040,7 @@ function applyDecor(){
   if(rainbow) buildRainbowFlags(deco);
   if(Shop.on('banners')) buildBanners(deco);
   if(Shop.on('garden')) buildGarden(deco);
-  $('#dragonG').style.display = Shop.on('dragon') ? '' : 'none';
+  Dragon.applyVisibility();
 }
 const Shop = {
   returnTo:'title',
@@ -1686,6 +2098,190 @@ const Shop = {
     play('fanfare');
     confettiBlast();
     speak(id === 'dragon' ? 'A pet dragon! He will guard the gate!' : 'Beautiful! The castle looks wonderful!');
+  }
+};
+
+/* ================================================================
+   PETS — adopt, feed and care for animal friends
+   ================================================================ */
+const GroundPets = {
+  units:{}, zone:{ x1:175, x2:680, y1:778, y2:862 },
+  init(){
+    this.layer = $('#petsG');
+    this.sync();
+    this.wanderLoop();
+  },
+  defs(){ return PETS_DEF.filter(p => !p.dragon); },
+  sync(){
+    for(const def of this.defs()){
+      const own = Pets.has(def.id);
+      const u = this.units[def.id];
+      if(own && !u) this.spawn(def);
+      else if(!own && u){ u.g.remove(); delete this.units[def.id]; }
+    }
+    this.refreshBubbles();
+  },
+  spawn(def){
+    const g = el('g', { class:'gpet' }, this.layer);
+    const inner = el('g', { class:'gpet-inner' }, g);
+    const t = el('text', { y:0, 'text-anchor':'middle', 'font-size':36 }, inner);
+    t.textContent = def.emoji;
+    const bub = el('text', { y:-46, 'text-anchor':'middle', 'font-size':17, class:'hbub', visibility:'hidden' }, inner);
+    bub.textContent = '🍖';
+    const u = { id:def.id, g, inner, bub, x:rand(this.zone.x1, this.zone.x2), y:rand(this.zone.y1, this.zone.y2), dir:1, busy:false };
+    g.addEventListener('click', () => this.pat(u));
+    this.units[def.id] = u;
+    this.place(u);
+  },
+  place(u){ u.g.setAttribute('transform', `translate(${u.x} ${u.y}) scale(${u.dir} 1)`); },
+  refreshBubbles(){
+    for(const id in this.units){ this.units[id].bub.setAttribute('visibility', Pets.hungry(id) ? 'visible' : 'hidden'); }
+  },
+  wanderLoop(){
+    const step = () => {
+      const ids = Object.keys(this.units);
+      if(ids.length && document.visibilityState !== 'hidden'){
+        const u = this.units[pickRand(ids)];
+        if(u && !u.busy){
+          const tx = Math.max(this.zone.x1, Math.min(this.zone.x2, u.x + rand(-170, 170)));
+          const ty = Math.max(this.zone.y1, Math.min(this.zone.y2, u.y + rand(-50, 50)));
+          u.dir = tx < u.x ? -1 : 1;
+          u.busy = true;
+          u.g.classList.add('walking');
+          const fx0 = u.x, fy0 = u.y;
+          tween(Math.max(700, Math.hypot(tx - fx0, ty - fy0) * 11), t => { u.x = lerp(fx0, tx, t); u.y = lerp(fy0, ty, t); this.place(u); })
+            .then(() => { u.g.classList.remove('walking'); u.busy = false; });
+        }
+      }
+      this.refreshBubbles();
+      setTimeout(step, rand(2400, 5200));
+    };
+    setTimeout(step, 2000);
+  },
+  /* tap = pat: hearts and a happy hop */
+  pat(u){
+    if(u.busy) return;
+    u.busy = true;
+    play('pop');
+    fxFloatText(u.x, u.y - 52, '❤', '#e2574c');
+    if(u.id === 'unicorn') fxFloatText(u.x + 16, u.y - 66, '✨', '#b59ce8');
+    tween(420, t => { u.inner.setAttribute('transform', `translate(0 ${-20 * Math.sin(Math.PI * t)})`); })
+      .then(() => { u.inner.removeAttribute('transform'); u.busy = false; });
+  },
+  feedAnim(id){
+    const u = this.units[id];
+    if(!u) return;
+    fxFloatText(u.x, u.y - 54, '🍖');
+    setTimeout(() => fxFloatText(u.x, u.y - 60, '❤', '#e2574c'), 600);
+    if(!u.busy) this.pat(u);
+    this.refreshBubbles();
+  }
+};
+const Pets = {
+  returnTo:'title',
+  FEED_COST:2,
+  has(id){ return PETS.owned.includes(id); },
+  hungry(id){
+    if(id === 'dragon'){ if(!Shop.has('dragon')) return false; }
+    else if(!this.has(id)) return false;
+    return (Date.now() - (PETS.fedAt[id] || 0)) > 20 * 3600 * 1000;
+  },
+  save(){ store.set('lc.pets.v1', PETS); },
+  open(returnTo){ this.returnTo = returnTo || 'title'; this.render(); UI.show('pets'); },
+  refreshWallet(){ $('#petsWallet').textContent = `⭐ ${totalStars}`; },
+  careList(){
+    const out = [];
+    if(Shop.has('dragon')) out.push({ id:'dragon', emoji:'🐲', name:'Dragon', dragon:true });
+    for(const p of PETS_DEF){ if(this.has(p.id)) out.push(p); }
+    return out;
+  },
+  render(){
+    const box = $('#petsScroll');
+    box.innerHTML = '';
+    const mkH = txt => { const h = document.createElement('div'); h.className = 'list-h'; h.textContent = txt; box.appendChild(h); };
+    const care = this.careList();
+    if(care.length){
+      mkH('Your pets');
+      for(const p of care){
+        const card = document.createElement('div');
+        card.className = 'shop-card';
+        const love = PETS.love[p.id] || 0;
+        const hungry = this.hungry(p.id);
+        const role = p.dragon ? ' • guards the gate' : '';
+        card.innerHTML = `<div class="shop-icon">${p.emoji}</div><div class="shop-info"><div class="shop-name">${p.name}</div><div class="shop-desc">❤ ${love} ${hungry ? '• 🍖 hungry!' : '• 😊 happy'}${role}</div></div>`;
+        const btn = document.createElement('button');
+        if(hungry){
+          btn.className = 'shop-buy' + (totalStars < this.FEED_COST ? ' cant' : '');
+          btn.textContent = `🍖 ${this.FEED_COST} ⭐`;
+          btn.addEventListener('click', () => this.feed(p.id, card));
+        } else {
+          btn.className = 'shop-toggle on';
+          btn.textContent = '😊 Full';
+          btn.disabled = true;
+        }
+        card.appendChild(btn);
+        box.appendChild(card);
+      }
+    } else {
+      mkH('No pets yet — adopt a friend below!');
+    }
+    const adoptable = PETS_DEF.filter(p => !this.has(p.id));
+    if(adoptable.length){
+      mkH('Adopt a friend');
+      for(const p of adoptable){
+        const card = document.createElement('div');
+        card.className = 'shop-card';
+        card.innerHTML = `<div class="shop-icon">${p.emoji}</div><div class="shop-info"><div class="shop-name">${p.name}</div><div class="shop-desc">${p.desc}</div></div>`;
+        const btn = document.createElement('button');
+        btn.className = 'shop-buy' + (totalStars < p.cost ? ' cant' : '');
+        btn.textContent = `${p.cost} ⭐`;
+        btn.addEventListener('click', () => this.adopt(p.id, card));
+        card.appendChild(btn);
+        box.appendChild(card);
+      }
+    }
+    this.refreshWallet();
+  },
+  adopt(id, card){
+    const p = PETS_DEF.find(x => x.id === id);
+    if(!p || this.has(id)) return;
+    if(totalStars < p.cost){
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      play('aw');
+      speak('Earn more stars by stopping the troops!');
+      return;
+    }
+    totalStars -= p.cost;
+    store.set('lc.stars.v1', totalStars);
+    PETS.owned.push(id);
+    PETS.fedAt[id] = Date.now();
+    PETS.love[id] = 0;
+    this.save();
+    GroundPets.sync();
+    Dragon.applyVisibility();
+    this.render();
+    play('fanfare');
+    confettiBlast();
+    speak(p.dragon ? `${p.name} the dragon! He will guard the gate too!` : `A ${p.name.toLowerCase()}! Take good care of your new friend!`);
+  },
+  feed(id, card){
+    if(!this.hungry(id)) return;
+    if(totalStars < this.FEED_COST){
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+      play('aw');
+      return;
+    }
+    totalStars -= this.FEED_COST;
+    store.set('lc.stars.v1', totalStars);
+    PETS.fedAt[id] = Date.now();
+    PETS.love[id] = (PETS.love[id] || 0) + 1;
+    this.save();
+    play('yay');
+    speak('Yum yum! Thank you!');
+    const d = Dragon.byId(id);
+    if(d && Dragon.owned(d)) Dragon.greet(d);
+    else GroundPets.feedAnim(id);
+    this.render();
   }
 };
 
@@ -2053,6 +2649,38 @@ function pickWords(n){
   }
   return out;
 }
+/* ---- Word Joust questions ---- */
+function pickJoustWords(n){
+  const out = [], used = new Set();
+  for(let i = 0; i < n; i++){
+    const cands = JOUST_WORDS.filter(w => !used.has(w[1]));
+    const w = weightedPick(cands.length ? cands : JOUST_WORDS, wb => adaptiveWeight(wb[1][0]));
+    used.add(w[1]); out.push(w);
+  }
+  return out;
+}
+function makeJoustQuestion(entry){
+  const emoji = entry[0], word = entry[1];        // e.g. 🐱 CAT
+  const target = word[0];                          // C (the onset)
+  const rime = word.slice(1).toLowerCase();        // at
+  const consonants = ALPHA.filter(L => !'AEIOU'.includes(L) && L !== target);
+  // sneak in a consonant that spells a REAL word with this rime (cat → bat!)
+  const real = shuffle(consonants.filter(c => WORD_EMOJI[c + word.slice(1)]));
+  const n = Math.min(5, Math.max(2, cfg('optionCount')));
+  const dist = [];
+  if(real.length && n > 2) dist.push(real[0]);
+  for(const c of shuffle(consonants)){
+    if(dist.length >= n - 1) break;
+    if(!dist.includes(c)) dist.push(c);
+  }
+  const q = { mode:'joust', target, options:shuffle([target, ...dist]), wrongs:0 };
+  q.word = word; q.emoji = emoji; q.rime = rime;
+  q.answerCase = 'lower';
+  q.bannerText = emoji;
+  q.promptText = `Which letter makes ${emoji}?`;
+  q.speech = `${word.toLowerCase()}! Which letter makes ${word.toLowerCase()}?`;
+  return q;
+}
 
 /* ================================================================
    ANSWER BAR
@@ -2070,7 +2698,7 @@ const Bar = {
       chip.style.lineHeight = '1.2';
     } else {
       chip.textContent = q.bannerText;
-      chip.style.fontSize = (q.mode === 'sounds') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
+      chip.style.fontSize = (q.mode === 'sounds' || q.mode === 'joust') ? '40px' : (q.bannerText.length > 1 ? '30px' : '');
       chip.style.lineHeight = '';
     }
     $('#prompt').textContent = q.promptText;
@@ -2145,7 +2773,9 @@ const Game = {
   },
   async runWave(token){
     if(cfg('mode') === 'words') return this.runWordWave(token);
-    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
+    if(cfg('mode') === 'joust') return this.runJoustWave(token);
+    Arena.hide();
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUses = 0;
     this.waveTotal = S.waveLength;
     const stepCount = this.steps(), startT = this.startT();
     const stepLen = (1 - startT) / stepCount;
@@ -2170,9 +2800,63 @@ const Game = {
     }
     this.waveEnd();
   },
+  /* Word Joust: arm the left knight with the onset, then joust! */
+  async runJoustWave(token){
+    Arena.show();
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUses = 0;
+    const words = pickJoustWords(S.waveLength);
+    this.waveTotal = words.length;
+    for(let i = 0; i < words.length; i++){
+      if(token !== this.token) return;
+      this.updateHUD(i + 1, words.length);
+      const q = makeJoustQuestion(words[i]);
+      Arena.setup(q);
+      Bar.render(q);
+      await Arena.enter();
+      if(token !== this.token) return;
+      Phonics.say(q);
+      Bar.setEnabled(true);
+      const result = await this.joustBattle(q, token);
+      if(token !== this.token || result === 'aborted') return;
+      recordStat(q.target, q.wrongs);
+      await sleep(350);
+    }
+    this.waveEnd();
+  },
+  joustBattle(q, token){
+    return new Promise(resolve => {
+      Bar.onPick = async (i, btn) => {
+        if(token !== this.token) return resolve('aborted');
+        Bar.setEnabled(false);
+        const pick = q.options[i];
+        const correct = pick === q.target;
+        if(correct) Bar.markGood(btn);
+        else { Bar.markBad(btn); q.wrongs++; }
+        await Arena.armLeft(pick);
+        const spelled = (pick + q.rime).toLowerCase();
+        await Arena.charge(q, pick, correct, spelled);
+        if(token !== this.token) return resolve('aborted');
+        if(correct){
+          const stars = q.wrongs === 0 ? 2 : 1;
+          this.waveHits++; if(q.wrongs === 0) this.waveFirstTry++;
+          this.sessionStars += stars; totalStars += stars; store.set('lc.stars.v1', totalStars);
+          this.updateHUD();
+          fxFloatText(Arena.MEET, Arena.KY - 125, `+${stars} ⭐`);
+          play('yay');
+          await sleep(800);
+          resolve('won');
+        } else {
+          await Arena.recover();
+          if(token !== this.token) return resolve('aborted');
+          speak(pickRand(GENTLE));
+          Bar.setEnabled(true);
+        }
+      };
+    });
+  },
   /* Word Builder: each defeated troop drops its letter into the sign */
   async runWordWave(token){
-    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUsed = false;
+    this.waveHits = 0; this.waveFirstTry = 0; this.waveBonus = 0; this.dragonUses = 0;
     const words = pickWords(Math.max(2, Math.round(S.waveLength / 3)));
     const total = words.reduce((s, w) => s + w[1].length, 0);
     this.waveTotal = total;
@@ -2278,7 +2962,9 @@ const Game = {
   waveEnd(){
     play('fanfare');
     confettiBlast();
-    let title = 'Castle Defended! 🎉', nextLabel = 'Next Round ▶', nextInfo = '', line = 'Castle defended! Hooray!';
+    Dragon.cheer();
+    const joust = cfg('mode') === 'joust';
+    let title = joust ? 'Tournament Won! 🏆' : 'Castle Defended! 🎉', nextLabel = 'Next Round ▶', nextInfo = '', line = joust ? 'Tournament won! Hooray!' : 'Castle defended! Hooray!';
     if(S.mode === 'campaign'){
       const wasStage = Campaign.data.stage;
       const finished = Campaign.advance();
@@ -2319,6 +3005,7 @@ const Game = {
     $('#troops').innerHTML = '';
     $('#fx').innerHTML = '';
     WordSign.clear();
+    Arena.hide();
     Bar.onPick = null;
   }
 };
@@ -2336,6 +3023,7 @@ const Parade = {
       if(S.mode === 'sounds'){ const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = pickRand(WORDS[L] || [['🐌']])[0]; }
       else if(S.mode === 'words'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(WB_WORDS)[0]; }
       else if(S.mode === 'numbers'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(COUNT_EMOJI)[0]; }
+      else if(S.mode === 'joust'){ fakeQ.mode = 'sounds'; fakeQ.bannerText = pickRand(JOUST_WORDS)[0]; }
       else if(S.mode === 'teams'){ fakeQ.bannerText = pickRand(S.teams.length ? S.teams : DEFAULTS.teams).toLowerCase(); }
       else { const L = pickRand(S.letters.length ? S.letters : ALPHA); fakeQ.bannerText = Math.random() < .5 ? L : L.toLowerCase(); }
       const t = new Troop(fakeQ);
@@ -2356,6 +3044,21 @@ const Parade = {
 /* ================================================================
    UI / SCREENS
    ================================================================ */
+/* kid-facing mode picker on the title screen */
+const KID_MODES = [['campaign','🗺️','Quest'],['letters','🅰️','Letters'],['teams','🔠','Teams'],['sounds','🐶','Sounds'],['words','✏️','Words'],['numbers','🔢','Count'],['joust','⚔️','Joust']];
+function buildKidModes(){
+  const box = $('#kidModes');
+  if(S.kidModes === false){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = '';
+  for(const [val, icon, label] of KID_MODES){
+    const b = document.createElement('button');
+    b.className = 'kid-chip' + (S.mode === val ? ' sel' : '');
+    b.innerHTML = `<span class="kc-i">${icon}</span><span class="kc-l">${label}</span>`;
+    b.addEventListener('click', () => { audioInit(); S.mode = val; saveSettings(); play('pop'); UI.refreshTitle(); });
+    box.appendChild(b);
+  }
+}
 const UI = {
   show(name){
     $('#scrTitle').classList.toggle('hidden', name !== 'title');
@@ -2364,6 +3067,7 @@ const UI = {
     $('#scrWave').classList.toggle('hidden', name !== 'wave');
     $('#scrOver').classList.toggle('hidden', name !== 'over');
     $('#scrShop').classList.toggle('hidden', name !== 'shop');
+    $('#scrPets').classList.toggle('hidden', name !== 'pets');
     $('#scrLeave').classList.add('hidden');
     const inGame = name === 'game' || name === 'wave' || name === 'over';
     $('#hud').classList.toggle('hidden', !inGame);
@@ -2373,7 +3077,7 @@ const UI = {
   },
   refreshTitle(){
     $('#titleStars').textContent = `⭐ ${totalStars} stars collected`;
-    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder', numbers:'Numbers', campaign:'Campaign' };
+    const modeNames = { letters:'Letter Match', teams:'Letter Teams', sounds:'First Sounds', words:'Word Builder', numbers:'Numbers', joust:'Word Joust', campaign:'Campaign' };
     const diffNames = { easy:'Relaxed', steady:'Steady', brave:'Brave' };
     if(S.mode === 'campaign'){
       Campaign.current();
@@ -2381,6 +3085,7 @@ const UI = {
     } else {
       $('#modePill').textContent = `${modeNames[S.mode]} • ${S.optionCount} choices • ${diffNames[S.difficulty]}`;
     }
+    buildKidModes();
   }
 };
 
@@ -2452,9 +3157,9 @@ const Settings = {
       b.classList.toggle('sel', String(T[k]) === v);
     });
     $('#cardCampaign').classList.toggle('hidden', T.mode !== 'campaign');
-    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'campaign');
+    $('#cardStyle').classList.toggle('hidden', T.mode === 'sounds' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'campaign' || T.mode === 'joust');
     $('#cardSounds').classList.toggle('hidden', T.mode !== 'sounds');
-    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words' || T.mode === 'numbers');
+    $('#cardLetters').classList.toggle('hidden', T.mode === 'teams' || T.mode === 'words' || T.mode === 'numbers' || T.mode === 'joust');
     $('#cardTeams').classList.toggle('hidden', T.mode !== 'teams');
     $('#cardWords').classList.toggle('hidden', T.mode !== 'words');
     $('#cardNumbers').classList.toggle('hidden', T.mode !== 'numbers');
@@ -2463,13 +3168,14 @@ const Settings = {
     $('#swSfx').classList.toggle('on', T.sfx);
     $('#swVoice').classList.toggle('on', T.voice);
     $('#swPhonics').classList.toggle('on', T.phonics !== false);
+    $('#swKidModes').classList.toggle('on', T.kidModes !== false);
   },
   /* the editable list of campaign stages */
   buildCampaign(){
     if(!Array.isArray(T.campaign) || !T.campaign.length) T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT));
     const box = $('#campList');
     box.innerHTML = '';
-    const modeOpts = [['letters','Letter Match'],['sounds','First Sounds'],['teams','Letter Teams'],['words','Word Builder'],['numbers','Numbers']];
+    const modeOpts = [['letters','Letter Match'],['sounds','First Sounds'],['teams','Letter Teams'],['words','Word Builder'],['numbers','Numbers'],['joust','Word Joust']];
     const styleOpts = {
       letters:[['ul','B → b'],['lu','b → B'],['uu','B → B'],['ll','b → b'],['mixed','Mix 🎲']],
       teams:[['ul','SH → sh'],['lu','sh → SH'],['uu','SH → SH'],['ll','sh → sh'],['mixed','Mix 🎲']],
@@ -2579,10 +3285,11 @@ document.querySelectorAll('.quick-row button[data-quickt]').forEach(b => {
 $('#swSfx').addEventListener('click', () => { T.sfx = !T.sfx; Settings.sync(); });
 $('#swVoice').addEventListener('click', () => { T.voice = !T.voice; Settings.sync(); });
 $('#swPhonics').addEventListener('click', () => { T.phonics = T.phonics === false; Settings.sync(); });
+$('#swKidModes').addEventListener('click', () => { T.kidModes = T.kidModes === false; Settings.sync(); });
 $('#btnAddStage').addEventListener('click', () => { if(!T) return; T.campaign.push(JSON.parse(JSON.stringify(T.campaign[T.campaign.length - 1] || CAMPAIGN_DEFAULT[0]))); Settings.buildCampaign(); play('pop'); });
 $('#btnResetPlan').addEventListener('click', () => { if(!T) return; T.campaign = JSON.parse(JSON.stringify(CAMPAIGN_DEFAULT)); Settings.buildCampaign(); play('pop'); });
 $('#btnRestartCamp').addEventListener('click', () => { Campaign.reset(); if(T) Settings.buildCampaign(); play('pop'); });
-$('#btnStudio').addEventListener('click', () => { S = T; saveSettings(); location.href = 'record.html'; });
+$('#btnStudio').addEventListener('click', () => { S = T; saveSettings(); location.href = 'record.html?v=' + Date.now(); }); // cache-bust: always the newest Studio
 $('#btnVoiceTest').addEventListener('click', () => {
   const keep = S.voice; S.voice = true;
   speak('Hello! B! Find the uppercase B!');
@@ -2602,6 +3309,8 @@ $('#grownups').addEventListener('click', () => { audioInit(); Gate.open(); });
 $('#btnShop').addEventListener('click', () => { audioInit(); Shop.open('title'); });
 $('#btnWaveShop').addEventListener('click', () => Shop.open('wave'));
 $('#btnShopDone').addEventListener('click', () => UI.show(Shop.returnTo || 'title'));
+$('#btnPets').addEventListener('click', () => { audioInit(); Pets.open('title'); });
+$('#btnPetsDone').addEventListener('click', () => UI.show(Pets.returnTo || 'title'));
 $('#gateCancel').addEventListener('click', () => UI.show('title'));
 $('#btnHome').addEventListener('click', () => { $('#scrLeave').classList.remove('hidden'); });
 $('#btnStay').addEventListener('click', () => { $('#scrLeave').classList.add('hidden'); });
@@ -2623,9 +3332,10 @@ walkPathEl = $('#walkPath');
 walkLen = walkPathEl.getTotalLength();
 Catapult.init();
 Paddock.build(S.pantrySize);
-buildDragon();
+Dragon.buildAll();
 applyDecor();
 Dragon.startIdle();
+GroundPets.init();
 Phonics.load();
 fitView();
 ambientLoop();

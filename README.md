@@ -32,6 +32,7 @@ Everything is one file with no internet needed.
 | **First Sounds** | A troop carries a picture (🐶) — the voice asks "What letter makes the sound at the beginning of Dog?" (answers show lowercase by default; uppercase or both available) |
 | **Word Builder** | A word sign shows ghost letters (🐱 c‑a‑t) — each defeated troop drops its letter into the next slot; finishing a word earns a bonus ⭐ |
 | **Numbers** | The troop carries a banner of pictures (🐢🐢🐢🐢🐢) — count them and tap the numeral; the voice counts back "1, 2, 3, 4, 5! Five turtles!" |
+| **Word Joust** | A tournament arena! Big word cards at the top show `_‑at` next to the picture shield (🐱); the red knight carries the ending and the child arms the blue knight with the first letter. The knights charge, freeze mid-tilt while the two parts are sounded out — each card lights up gold as its sound plays (parent recordings used for both the letter *and* the ending if recorded) — then clash: spell it right and the red knight is unhorsed as "cat!" rings out. Spell it wrong and the blue knight tumbles, but whatever was spelled is still read aloud — and if it's a real word we know (b‑at → bat), its picture (🦇) flashes on the shield! |
 
 The game also **adapts quietly**: letters the child misses show up a little more
 often (and mastered ones rest), in every mode — Word Builder even prefers words
@@ -73,7 +74,8 @@ You can replace the robot voice's letter sounds with **your own voice**:
 2. Open **http://localhost:8000/record.html** (also linked from the grown-ups
    settings → "Open the Sound Studio").
 3. For each letter (and the sh/ch/th… teams), tap ●, say the letter's **sound**
-   ("buh" for B, "sss" for S), and it saves automatically.
+   ("buh" for B, "sss" for S), and it saves automatically. There's also a
+   **Word Endings** section ("-at", "-og", …) used by Word Joust's sound-out.
 
 Recordings are plain audio files stored in the **sounds/** folder next to the game
 (`b.webm`, `sh.webm`, … listed in `sounds/manifest.json`), so they sync with the
@@ -89,6 +91,7 @@ sounds" switch in settings turns playback on/off.
 
 - Game mode, matching style (b→B, B→b, B→B, b→b, or mixed)
 - Campaign plan editor: per-stage mode, style and choice count; reset plan; jump back to stage 1
+  (Word Joust can be a campaign stage too)
 - Which letters / letter teams are in play (tap to toggle, quick presets)
 - Word Builder word length: short (3), longer (4), or both
 - First Sounds answer buttons: lowercase (default), uppercase, or both (Aa)
